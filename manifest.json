@@ -1,0 +1,11 @@
+{
+  "name": "Rafaela Gym",
+  "short_name": "Rafaela Gym",
+  "description": "A practical Rafaela training gym based on the Universal Support Doctrine.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#0d1020",
+  "theme_color": "#13162a",
+  "orientation": "portrait-primary"
+}
