@@ -1,28 +1,30 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
 
   <meta
     name="viewport"
     content="width=device-width, initial-scale=1.0, viewport-fit=cover"
-  />
+  >
 
   <title>Rafaela Gym</title>
 
-  <link rel="manifest" href="./manifest.json" />
+  <link rel="manifest" href="./manifest.json">
 
-  <meta name="theme-color" content="#13162a" />
+  <meta name="theme-color" content="#13162a">
 
-  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+
   <meta
     name="apple-mobile-web-app-status-bar-style"
     content="black-translucent"
-  />
+  >
+
   <meta
     name="apple-mobile-web-app-title"
     content="Rafaela Gym"
-  />
+  >
 
   <style>
     * {
@@ -33,12 +35,12 @@
       margin: 0;
       min-height: 100vh;
       font-family: Arial, Helvetica, sans-serif;
+      color: #ffffff;
       background: linear-gradient(
         180deg,
         #13162a 0%,
         #0d1020 100%
       );
-      color: #ffffff;
     }
 
     .app {
@@ -187,11 +189,11 @@
       width: 48px;
       height: 48px;
       transform: translate(-50%, -50%);
-      border: 2px solid rgba(255, 255, 255, 0.4);
-      border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
+      border: 2px solid rgba(255, 255, 255, 0.4);
+      border-radius: 50%;
       font-size: 11px;
       font-weight: 700;
       z-index: 5;
@@ -351,16 +353,20 @@
   <main class="app">
 
     <header class="header">
+
       <div class="eyebrow">
         Universal Support Doctrine
       </div>
 
-      <h1>Rafaela Gym</h1>
+      <h1>
+        Rafaela Gym
+      </h1>
 
       <p class="subtitle">
         Train Rafaela decisions through repeated execution,
         not quizzes.
       </p>
+
     </header>
 
 
@@ -369,6 +375,7 @@
       <div class="top-row">
 
         <div>
+
           <div class="small-label">
             Positioning Gym · Rep
             <span id="rep">1</span>
@@ -381,9 +388,12 @@
           >
             Support the objective without becoming the easiest target.
           </div>
+
         </div>
 
+
         <div class="score-box">
+
           <div
             class="score-number"
             id="score"
@@ -394,15 +404,19 @@
           <div class="score-label">
             position
           </div>
+
         </div>
 
       </div>
 
+
       <div class="progress">
+
         <div
           class="progress-fill"
           id="progressFill"
         ></div>
+
       </div>
 
     </section>
@@ -417,6 +431,7 @@
         Tap anywhere on the battlefield to move Rafaela.
       </div>
 
+
       <div
         class="battlefield"
         id="battlefield"
@@ -426,12 +441,14 @@
 
         <div class="objective-zone"></div>
 
+
         <div
           class="unit"
           id="objective"
         >
           OBJ
         </div>
+
 
         <div
           class="unit"
@@ -440,6 +457,7 @@
           ALLY
         </div>
 
+
         <div
           class="unit"
           id="frontliner"
@@ -447,12 +465,14 @@
           FRONT
         </div>
 
+
         <div
           class="unit"
           id="threat"
         >
           THREAT
         </div>
+
 
         <div
           class="unit"
@@ -521,26 +541,50 @@
         id="resultTitle"
       ></div>
 
+
       <div class="feedback-grid">
 
         <div class="feedback-section">
-          <strong>Cue</strong>
+
+          <strong>
+            Cue
+          </strong>
+
           <p id="cue"></p>
+
         </div>
 
+
         <div class="feedback-section">
-          <strong>Action</strong>
+
+          <strong>
+            Action
+          </strong>
+
           <p id="action"></p>
+
         </div>
 
+
         <div class="feedback-section">
-          <strong>Reason</strong>
+
+          <strong>
+            Reason
+          </strong>
+
           <p id="reason"></p>
+
         </div>
 
+
         <div class="feedback-section">
-          <strong>Result Check</strong>
+
+          <strong>
+            Result Check
+          </strong>
+
           <p id="resultCheck"></p>
+
         </div>
 
       </div>
@@ -554,7 +598,7 @@
         Decision Loop
       </strong>
 
-      <br />
+      <br>
 
       Observe →
       Assess →
@@ -570,7 +614,9 @@
 
 
   <script>
+
     const reps = [
+
       {
         focus:
           "Support the objective without becoming the easiest target.",
@@ -581,6 +627,7 @@
         threat: [82, 42],
         objective: [55, 31]
       },
+
 
       {
         focus:
@@ -593,6 +640,7 @@
         objective: [52, 30]
       },
 
+
       {
         focus:
           "Your team moves forward. Stay connected without copying the frontline.",
@@ -603,6 +651,7 @@
         threat: [76, 25],
         objective: [51, 30]
       },
+
 
       {
         focus:
@@ -615,6 +664,7 @@
         objective: [50, 29]
       },
 
+
       {
         focus:
           "Balance ally access, objective access, threat distance, and escape space.",
@@ -625,11 +675,14 @@
         threat: [31, 49],
         objective: [51, 28]
       }
+
     ];
 
 
     let currentRep = 0;
+
     let evaluated = false;
+
 
     let rafaelaPosition = [
       reps[0].rafaela[0],
@@ -638,54 +691,95 @@
 
 
     const battlefield =
-      document.getElementById("battlefield");
+      document.getElementById(
+        "battlefield"
+      );
+
 
     const rafaela =
-      document.getElementById("rafaela");
+      document.getElementById(
+        "rafaela"
+      );
+
 
     const ally =
-      document.getElementById("ally");
+      document.getElementById(
+        "ally"
+      );
+
 
     const frontliner =
-      document.getElementById("frontliner");
+      document.getElementById(
+        "frontliner"
+      );
+
 
     const threat =
-      document.getElementById("threat");
+      document.getElementById(
+        "threat"
+      );
+
 
     const objective =
-      document.getElementById("objective");
+      document.getElementById(
+        "objective"
+      );
+
 
     const repText =
-      document.getElementById("rep");
+      document.getElementById(
+        "rep"
+      );
+
 
     const focusText =
-      document.getElementById("focus");
+      document.getElementById(
+        "focus"
+      );
+
 
     const scoreText =
-      document.getElementById("score");
+      document.getElementById(
+        "score"
+      );
+
 
     const evaluateButton =
-      document.getElementById("evaluateButton");
+      document.getElementById(
+        "evaluateButton"
+      );
+
 
     const nextButton =
-      document.getElementById("nextButton");
+      document.getElementById(
+        "nextButton"
+      );
+
 
     const feedback =
-      document.getElementById("feedback");
+      document.getElementById(
+        "feedback"
+      );
+
 
     const progressFill =
-      document.getElementById("progressFill");
+      document.getElementById(
+        "progressFill"
+      );
 
 
     function placeUnit(
       element,
       position
     ) {
+
       element.style.left =
         position[0] + "%";
 
+
       element.style.top =
         position[1] + "%";
+
     }
 
 
@@ -693,74 +787,93 @@
       a,
       b
     ) {
+
       const dx =
         a[0] - b[0];
 
+
       const dy =
         a[1] - b[1];
+
 
       return Math.sqrt(
         dx * dx +
         dy * dy
       );
+
     }
 
 
     function loadRep() {
+
       const rep =
         reps[currentRep];
 
+
       evaluated =
         false;
+
 
       rafaelaPosition = [
         rep.rafaela[0],
         rep.rafaela[1]
       ];
 
+
       placeUnit(
         rafaela,
         rafaelaPosition
       );
+
 
       placeUnit(
         ally,
         rep.ally
       );
 
+
       placeUnit(
         frontliner,
         rep.frontliner
       );
+
 
       placeUnit(
         threat,
         rep.threat
       );
 
+
       placeUnit(
         objective,
         rep.objective
       );
 
+
       repText.textContent =
         currentRep + 1;
+
 
       focusText.textContent =
         rep.focus;
 
+
       scoreText.textContent =
         "—";
+
 
       feedback.classList.remove(
         "show"
       );
 
+
       nextButton.disabled =
         true;
 
+
       evaluateButton.disabled =
         false;
+
 
       progressFill.style.width =
         (
@@ -771,19 +884,23 @@
           100
         )
         + "%";
+
     }
 
 
     battlefield.addEventListener(
       "pointerdown",
+
       function(event) {
 
         if (evaluated) {
           return;
         }
 
+
         const rectangle =
           battlefield.getBoundingClientRect();
+
 
         let x =
           (
@@ -794,6 +911,7 @@
           *
           100;
 
+
         let y =
           (
             (event.clientY - rectangle.top)
@@ -802,6 +920,7 @@
           )
           *
           100;
+
 
         x =
           Math.max(
@@ -812,6 +931,7 @@
             )
           );
 
+
         y =
           Math.max(
             5,
@@ -821,13 +941,16 @@
             )
           );
 
+
         rafaelaPosition =
           [x, y];
+
 
         placeUnit(
           rafaela,
           rafaelaPosition
         );
+
       }
     );
 
@@ -840,17 +963,25 @@
 
     nextButton.addEventListener(
       "click",
+
       function() {
 
         currentRep++;
 
+
         if (
-          currentRep >= reps.length
+          currentRep >=
+          reps.length
         ) {
-          currentRep = 0;
+
+          currentRep =
+            0;
+
         }
 
+
         loadRep();
+
       }
     );
 
@@ -861,10 +992,14 @@
         return;
       }
 
-      evaluated = true;
+
+      evaluated =
+        true;
+
 
       evaluateButton.disabled =
         true;
+
 
       nextButton.disabled =
         false;
@@ -880,17 +1015,20 @@
           rep.ally
         );
 
+
       const threatDistance =
         distance(
           rafaelaPosition,
           rep.threat
         );
 
+
       const objectiveDistance =
         distance(
           rafaelaPosition,
           rep.objective
         );
+
 
       const frontDistance =
         distance(
@@ -899,53 +1037,72 @@
         );
 
 
-      let score = 100;
+      let score =
+        100;
 
 
       if (
         allyDistance > 36
       ) {
+
         score -=
           Math.min(
             35,
-            (allyDistance - 36) * 1.4
+            (allyDistance - 36)
+            *
+            1.4
           );
+
       }
 
 
       if (
         allyDistance < 9
       ) {
-        score -= 8;
+
+        score -=
+          8;
+
       }
 
 
       if (
         threatDistance < 22
       ) {
+
         score -=
           Math.min(
             40,
-            (22 - threatDistance) * 2.4
+            (22 - threatDistance)
+            *
+            2.4
           );
+
       }
 
 
       if (
         objectiveDistance > 48
       ) {
+
         score -=
           Math.min(
             25,
-            objectiveDistance - 48
+            objectiveDistance
+            -
+            48
           );
+
       }
 
 
       if (
         frontDistance < 8
       ) {
-        score -= 10;
+
+        score -=
+          10;
+
       }
 
 
@@ -966,8 +1123,11 @@
 
 
       let title;
+
       let action;
+
       let reason;
+
       let check;
 
 
@@ -978,15 +1138,20 @@
         title =
           "Strong Position";
 
+
         action =
           "You maintained useful ally access while preserving separation from the main threat.";
+
 
         reason =
           "Rafaela creates value by participating without becoming an unnecessary first target.";
 
+
         check =
           "If an ally, threat, objective, or escape route changes, reposition again.";
+
       }
+
 
       else if (
         threatDistance < 22
@@ -995,15 +1160,20 @@
         title =
           "Too Exposed";
 
+
         action =
           "Create more separation from the threat while staying connected to your team.";
+
 
         reason =
           "Support access is not useful if Rafaela can be removed before contributing.";
 
+
         check =
           "Can the threat reach you easily? Can you move safer without disconnecting?";
+
       }
+
 
       else if (
         allyDistance > 36
@@ -1012,36 +1182,51 @@
         title =
           "Too Disconnected";
 
+
         action =
           "Move closer to the relevant ally group while maintaining a safe angle.";
+
 
         reason =
           "Excessive safety reduces participation. Rafaela must remain close enough to influence the play.";
 
+
         check =
           "Can you realistically support the ally if the fight starts now?";
+
       }
+
 
       else {
 
         title =
           "Usable — Improve the Angle";
 
+
         action =
           "Make a smaller adjustment to improve participation, safety, or escape space.";
+
 
         reason =
           "Good positioning is a balance, not one perfect fixed location.";
 
+
         check =
           "Can you help immediately while still responding safely if the situation changes?";
+
       }
 
 
       document.getElementById(
         "resultTitle"
       ).textContent =
-        `${title} · ${score}/100`;
+        title
+        +
+        " · "
+        +
+        score
+        +
+        "/100";
 
 
       document.getElementById(
@@ -1071,10 +1256,59 @@
       feedback.classList.add(
         "show"
       );
+
     }
 
 
     loadRep();
+
+
+    /*
+      Register the Rafaela Gym service worker.
+
+      This lets the browser cache the app so it
+      can continue working after it has been loaded.
+    */
+
+    if (
+      "serviceWorker" in navigator
+    ) {
+
+      window.addEventListener(
+        "load",
+
+        function() {
+
+          navigator.serviceWorker
+            .register(
+              "./service-worker.js"
+            )
+            .then(
+              function(registration) {
+
+                console.log(
+                  "Rafaela Gym service worker registered:",
+                  registration.scope
+                );
+
+              }
+            )
+            .catch(
+              function(error) {
+
+                console.error(
+                  "Service worker registration failed:",
+                  error
+                );
+
+              }
+            );
+
+        }
+      );
+
+    }
+
   </script>
 
 </body>
