@@ -1,0 +1,1017 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+  />
+
+  <title>Rafaela Gym</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background:
+        linear-gradient(180deg, #13162a 0%, #0d1020 100%);
+      color: #ffffff;
+      min-height: 100vh;
+    }
+
+    .app {
+      width: min(100%, 760px);
+      margin: 0 auto;
+      padding: 18px;
+    }
+
+    .header {
+      margin-bottom: 18px;
+    }
+
+    .eyebrow {
+      color: #b9a9ff;
+      font-size: 13px;
+      font-weight: bold;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      margin: 5px 0 6px;
+      font-size: 30px;
+    }
+
+    .subtitle {
+      color: #b9bdd1;
+      line-height: 1.5;
+      margin: 0;
+    }
+
+    .card {
+      background: #181c33;
+      border: 1px solid #303652;
+      border-radius: 18px;
+      padding: 16px;
+      margin-bottom: 15px;
+    }
+
+    .top-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 14px;
+    }
+
+    .small-label {
+      color: #9ea5c3;
+      font-size: 13px;
+    }
+
+    .focus {
+      margin-top: 6px;
+      font-size: 18px;
+      font-weight: bold;
+      line-height: 1.4;
+    }
+
+    .score-box {
+      min-width: 86px;
+      text-align: center;
+      padding: 10px;
+      border-radius: 14px;
+      background: #101426;
+      border: 1px solid #303652;
+    }
+
+    .score-number {
+      font-size: 25px;
+      font-weight: bold;
+    }
+
+    .score-label {
+      color: #9ea5c3;
+      font-size: 11px;
+      margin-top: 2px;
+    }
+
+    .battlefield {
+      position: relative;
+      height: 430px;
+      overflow: hidden;
+      border-radius: 18px;
+      border: 1px solid #3a4060;
+      background:
+        radial-gradient(
+          circle at center,
+          rgba(100, 86, 180, 0.15),
+          transparent 34%
+        ),
+        linear-gradient(
+          135deg,
+          #202b37 0%,
+          #16222d 50%,
+          #202b37 100%
+        );
+
+      touch-action: manipulation;
+      user-select: none;
+      cursor: crosshair;
+    }
+
+    .river {
+      position: absolute;
+      left: -20%;
+      top: 47%;
+      width: 140%;
+      height: 55px;
+      transform: rotate(-14deg);
+      background: rgba(71, 112, 145, 0.22);
+      border-top: 1px solid rgba(136, 183, 221, 0.18);
+      border-bottom: 1px solid rgba(136, 183, 221, 0.18);
+      pointer-events: none;
+    }
+
+    .objective-zone {
+      position: absolute;
+      left: 50%;
+      top: 33%;
+      width: 115px;
+      height: 115px;
+      transform: translate(-50%, -50%);
+      border: 1px dashed rgba(255, 255, 255, 0.18);
+      border-radius: 50%;
+      pointer-events: none;
+    }
+
+    .unit {
+      position: absolute;
+      width: 48px;
+      height: 48px;
+      transform: translate(-50%, -50%);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: bold;
+      border: 2px solid rgba(255, 255, 255, 0.4);
+      z-index: 5;
+      transition:
+        left 0.18s ease,
+        top 0.18s ease;
+    }
+
+    #rafaela {
+      width: 52px;
+      height: 52px;
+      background: #c9b5ff;
+      color: #21163f;
+      border: 3px solid white;
+      z-index: 10;
+      box-shadow: 0 0 0 6px rgba(201, 181, 255, 0.12);
+    }
+
+    #ally {
+      background: #4fa873;
+    }
+
+    #frontliner {
+      background: #557dc4;
+    }
+
+    #threat {
+      background: #ba4f63;
+    }
+
+    #objective {
+      background: #c99b46;
+      color: #1b1408;
+    }
+
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .legend-item {
+      font-size: 12px;
+      color: #c4c8db;
+      background: #101426;
+      border-radius: 999px;
+      padding: 7px 10px;
+    }
+
+    .buttons {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    button {
+      min-height: 48px;
+      border: none;
+      border-radius: 14px;
+      font-size: 15px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .primary {
+      background: #bda7ff;
+      color: #1e1638;
+    }
+
+    .secondary {
+      background: #272d48;
+      color: white;
+      border: 1px solid #3b4262;
+    }
+
+    button:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+
+    .feedback {
+      display: none;
+    }
+
+    .feedback.show {
+      display: block;
+    }
+
+    .result-title {
+      font-size: 20px;
+      font-weight: bold;
+      margin-bottom: 14px;
+    }
+
+    .feedback-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    .feedback-section strong {
+      display: block;
+      font-size: 12px;
+      color: #b8a9ff;
+      text-transform: uppercase;
+      letter-spacing: 0.7px;
+      margin-bottom: 5px;
+    }
+
+    .feedback-section p {
+      margin: 0;
+      color: #d2d5e2;
+      line-height: 1.5;
+      font-size: 14px;
+    }
+
+    .doctrine {
+      text-align: center;
+      color: #bac0d6;
+      font-size: 13px;
+      line-height: 1.7;
+    }
+
+    .doctrine strong {
+      color: white;
+    }
+
+    .progress {
+      margin-top: 12px;
+      height: 7px;
+      background: #101426;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      width: 20%;
+      background: #bda7ff;
+      transition: width 0.3s ease;
+    }
+
+    @media (max-width: 560px) {
+      .app {
+        padding: 12px;
+      }
+
+      h1 {
+        font-size: 26px;
+      }
+
+      .battlefield {
+        height: 390px;
+      }
+
+      .feedback-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .buttons {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <main class="app">
+
+    <header class="header">
+      <div class="eyebrow">Universal Support Doctrine</div>
+      <h1>Rafaela Gym</h1>
+
+      <p class="subtitle">
+        Train Rafaela decisions through repeated execution,
+        not quizzes.
+      </p>
+    </header>
+
+
+    <section class="card">
+
+      <div class="top-row">
+
+        <div>
+          <div class="small-label">
+            Positioning Gym · Rep
+            <span id="rep">1</span> / 5
+          </div>
+
+          <div class="focus" id="focus">
+            Support the objective without becoming the easiest target.
+          </div>
+        </div>
+
+        <div class="score-box">
+          <div class="score-number" id="score">—</div>
+          <div class="score-label">
+            position
+          </div>
+        </div>
+
+      </div>
+
+      <div class="progress">
+        <div class="progress-fill" id="progressFill"></div>
+      </div>
+
+    </section>
+
+
+    <section class="card">
+
+      <div class="small-label" style="margin-bottom:10px;">
+        Tap anywhere on the battlefield to move Rafaela.
+      </div>
+
+      <div class="battlefield" id="battlefield">
+
+        <div class="river"></div>
+        <div class="objective-zone"></div>
+
+        <div class="unit" id="objective">
+          OBJ
+        </div>
+
+        <div class="unit" id="ally">
+          ALLY
+        </div>
+
+        <div class="unit" id="frontliner">
+          FRONT
+        </div>
+
+        <div class="unit" id="threat">
+          THREAT
+        </div>
+
+        <div class="unit" id="rafaela">
+          R
+        </div>
+
+      </div>
+
+
+      <div class="legend">
+        <div class="legend-item">R = Rafaela</div>
+        <div class="legend-item">ALLY = priority ally</div>
+        <div class="legend-item">FRONT = frontline</div>
+        <div class="legend-item">THREAT = enemy threat</div>
+        <div class="legend-item">OBJ = objective</div>
+      </div>
+
+
+      <div class="buttons">
+
+        <button
+          class="primary"
+          id="evaluateButton"
+        >
+          Evaluate Position
+        </button>
+
+        <button
+          class="secondary"
+          id="nextButton"
+          disabled
+        >
+          Next Rep
+        </button>
+
+      </div>
+
+    </section>
+
+
+    <section
+      class="card feedback"
+      id="feedback"
+    >
+
+      <div
+        class="result-title"
+        id="resultTitle"
+      >
+      </div>
+
+      <div class="feedback-grid">
+
+        <div class="feedback-section">
+          <strong>Cue</strong>
+          <p id="cue"></p>
+        </div>
+
+        <div class="feedback-section">
+          <strong>Action</strong>
+          <p id="action"></p>
+        </div>
+
+        <div class="feedback-section">
+          <strong>Reason</strong>
+          <p id="reason"></p>
+        </div>
+
+        <div class="feedback-section">
+          <strong>Result Check</strong>
+          <p id="resultCheck"></p>
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <section class="card doctrine">
+
+      <strong>Decision Loop</strong>
+
+      <br>
+
+      Observe →
+      Assess →
+      Prioritize →
+      Position →
+      Act →
+      Verify →
+      Reassess
+
+    </section>
+
+  </main>
+
+
+  <script>
+
+    const reps = [
+
+      {
+        focus:
+          "Support the objective without becoming the easiest target.",
+
+        rafaela: [37, 76],
+        ally: [67, 65],
+        frontliner: [54, 47],
+        threat: [82, 42],
+        objective: [55, 31]
+      },
+
+      {
+        focus:
+          "A flank threat is near your backline. Find a protective support angle.",
+
+        rafaela: [61, 76],
+        ally: [36, 63],
+        frontliner: [48, 43],
+        threat: [22, 40],
+        objective: [52, 30]
+      },
+
+      {
+        focus:
+          "Your team moves forward. Stay connected without copying the frontline.",
+
+        rafaela: [43, 78],
+        ally: [69, 57],
+        frontliner: [58, 39],
+        threat: [76, 25],
+        objective: [51, 30]
+      },
+
+      {
+        focus:
+          "The threat moves closer. Reposition before becoming an easy second target.",
+
+        rafaela: [30, 76],
+        ally: [43, 67],
+        frontliner: [57, 48],
+        threat: [66, 58],
+        objective: [50, 29]
+      },
+
+      {
+        focus:
+          "Balance ally access, objective access, threat distance, and escape space.",
+
+        rafaela: [72, 78],
+        ally: [62, 62],
+        frontliner: [50, 44],
+        threat: [31, 49],
+        objective: [51, 28]
+      }
+
+    ];
+
+
+    let currentRep = 0;
+    let evaluated = false;
+
+    let rafaelaPosition = [
+      reps[0].rafaela[0],
+      reps[0].rafaela[1]
+    ];
+
+
+    const battlefield =
+      document.getElementById("battlefield");
+
+    const rafaela =
+      document.getElementById("rafaela");
+
+    const ally =
+      document.getElementById("ally");
+
+    const frontliner =
+      document.getElementById("frontliner");
+
+    const threat =
+      document.getElementById("threat");
+
+    const objective =
+      document.getElementById("objective");
+
+
+    const repText =
+      document.getElementById("rep");
+
+    const focusText =
+      document.getElementById("focus");
+
+    const scoreText =
+      document.getElementById("score");
+
+    const evaluateButton =
+      document.getElementById("evaluateButton");
+
+    const nextButton =
+      document.getElementById("nextButton");
+
+    const feedback =
+      document.getElementById("feedback");
+
+    const progressFill =
+      document.getElementById("progressFill");
+
+
+    function placeUnit(element, position) {
+
+      element.style.left =
+        position[0] + "%";
+
+      element.style.top =
+        position[1] + "%";
+
+    }
+
+
+    function distance(a, b) {
+
+      const dx = a[0] - b[0];
+      const dy = a[1] - b[1];
+
+      return Math.sqrt(
+        dx * dx + dy * dy
+      );
+
+    }
+
+
+    function loadRep() {
+
+      const rep =
+        reps[currentRep];
+
+      evaluated = false;
+
+      rafaelaPosition = [
+        rep.rafaela[0],
+        rep.rafaela[1]
+      ];
+
+
+      placeUnit(
+        rafaela,
+        rafaelaPosition
+      );
+
+      placeUnit(
+        ally,
+        rep.ally
+      );
+
+      placeUnit(
+        frontliner,
+        rep.frontliner
+      );
+
+      placeUnit(
+        threat,
+        rep.threat
+      );
+
+      placeUnit(
+        objective,
+        rep.objective
+      );
+
+
+      repText.textContent =
+        currentRep + 1;
+
+      focusText.textContent =
+        rep.focus;
+
+      scoreText.textContent =
+        "—";
+
+      feedback.classList.remove(
+        "show"
+      );
+
+      nextButton.disabled =
+        true;
+
+      evaluateButton.disabled =
+        false;
+
+
+      progressFill.style.width =
+        ((currentRep + 1) / reps.length * 100)
+        + "%";
+
+    }
+
+
+    battlefield.addEventListener(
+      "pointerdown",
+      function(event) {
+
+        if (evaluated) {
+          return;
+        }
+
+        const rectangle =
+          battlefield.getBoundingClientRect();
+
+
+        let x =
+          (
+            (event.clientX - rectangle.left)
+            /
+            rectangle.width
+          ) * 100;
+
+
+        let y =
+          (
+            (event.clientY - rectangle.top)
+            /
+            rectangle.height
+          ) * 100;
+
+
+        x =
+          Math.max(
+            5,
+            Math.min(95, x)
+          );
+
+
+        y =
+          Math.max(
+            5,
+            Math.min(95, y)
+          );
+
+
+        rafaelaPosition =
+          [x, y];
+
+
+        placeUnit(
+          rafaela,
+          rafaelaPosition
+        );
+
+      }
+    );
+
+
+    evaluateButton.addEventListener(
+      "click",
+      evaluatePosition
+    );
+
+
+    nextButton.addEventListener(
+      "click",
+      function() {
+
+        currentRep++;
+
+        if (
+          currentRep >= reps.length
+        ) {
+
+          currentRep = 0;
+
+        }
+
+        loadRep();
+
+      }
+    );
+
+
+    function evaluatePosition() {
+
+      if (evaluated) {
+        return;
+      }
+
+      evaluated = true;
+
+      evaluateButton.disabled =
+        true;
+
+      nextButton.disabled =
+        false;
+
+
+      const rep =
+        reps[currentRep];
+
+
+      const allyDistance =
+        distance(
+          rafaelaPosition,
+          rep.ally
+        );
+
+
+      const threatDistance =
+        distance(
+          rafaelaPosition,
+          rep.threat
+        );
+
+
+      const objectiveDistance =
+        distance(
+          rafaelaPosition,
+          rep.objective
+        );
+
+
+      const frontDistance =
+        distance(
+          rafaelaPosition,
+          rep.frontliner
+        );
+
+
+      let score = 100;
+
+
+      if (
+        allyDistance > 36
+      ) {
+
+        score -=
+          Math.min(
+            35,
+            (allyDistance - 36) * 1.4
+          );
+
+      }
+
+
+      if (
+        allyDistance < 9
+      ) {
+
+        score -= 8;
+
+      }
+
+
+      if (
+        threatDistance < 22
+      ) {
+
+        score -=
+          Math.min(
+            40,
+            (22 - threatDistance) * 2.4
+          );
+
+      }
+
+
+      if (
+        objectiveDistance > 48
+      ) {
+
+        score -=
+          Math.min(
+            25,
+            objectiveDistance - 48
+          );
+
+      }
+
+
+      if (
+        frontDistance < 8
+      ) {
+
+        score -= 10;
+
+      }
+
+
+      score =
+        Math.round(
+          Math.max(
+            0,
+            Math.min(100, score)
+          )
+        );
+
+
+      scoreText.textContent =
+        score;
+
+
+      let title;
+      let action;
+      let reason;
+      let check;
+
+
+      if (
+        score >= 85
+      ) {
+
+        title =
+          "Strong Position";
+
+        action =
+          "You maintained useful ally access while preserving separation from the main threat.";
+
+        reason =
+          "Rafaela creates value by participating without becoming an unnecessary first target.";
+
+        check =
+          "If an ally, threat, objective, or escape route changes, reposition again.";
+
+      }
+
+      else if (
+        threatDistance < 22
+      ) {
+
+        title =
+          "Too Exposed";
+
+        action =
+          "Create more separation from the threat while staying connected to your team.";
+
+        reason =
+          "Support access is not useful if Rafaela can be removed before contributing.";
+
+        check =
+          "Can the threat reach you easily? Can you move safer without disconnecting?";
+
+      }
+
+      else if (
+        allyDistance > 36
+      ) {
+
+        title =
+          "Too Disconnected";
+
+        action =
+          "Move closer to the relevant ally group while maintaining a safe angle.";
+
+        reason =
+          "Excessive safety reduces participation. Rafaela must remain close enough to influence the play.";
+
+        check =
+          "Can you realistically support the ally if the fight starts now?";
+
+      }
+
+      else {
+
+        title =
+          "Usable — Improve the Angle";
+
+        action =
+          "Make a smaller adjustment to improve participation, safety, or escape space.";
+
+        reason =
+          "Good positioning is a balance, not one perfect fixed location.";
+
+        check =
+          "Can you help immediately while still responding safely if the situation changes?";
+
+      }
+
+
+      document.getElementById(
+        "resultTitle"
+      ).textContent =
+        title + " · " + score + "/100";
+
+
+      document.getElementById(
+        "cue"
+      ).textContent =
+        rep.focus;
+
+
+      document.getElementById(
+        "action"
+      ).textContent =
+        action;
+
+
+      document.getElementById(
+        "reason"
+      ).textContent =
+        reason;
+
+
+      document.getElementById(
+        "resultCheck"
+      ).textContent =
+        check;
+
+
+      feedback.classList.add(
+        "show"
+      );
+
+    }
+
+
+    loadRep();
+
+  </script>
+
+</body>
+</html>
