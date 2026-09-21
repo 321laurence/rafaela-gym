@@ -1,9 +1,11 @@
-const CACHE_NAME = "rafaela-gym-v1";
+const CACHE_NAME = "rafaela-gym-v2";
 
 const APP_FILES = [
   "./",
   "./index.html",
-  "./manifest.json"
+  "./manifest.json",
+  "./icon-192.png",
+  "./icon-512.png"
 ];
 
 self.addEventListener("install", (event) => {
@@ -43,8 +45,11 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
+  const requestURL =
+    new URL(event.request.url);
+
   if (
-    new URL(event.request.url).origin !==
+    requestURL.origin !==
     self.location.origin
   ) {
     return;
@@ -53,6 +58,14 @@ self.addEventListener("fetch", (event) => {
   event.respondWith(
     fetch(event.request)
       .then((response) => {
+
+        if (
+          !response ||
+          response.status !== 200
+        ) {
+          return response;
+        }
+
         const responseCopy =
           response.clone();
 
@@ -67,16 +80,31 @@ self.addEventListener("fetch", (event) => {
 
         return response;
       })
+
       .catch(() => {
         return caches
           .match(event.request)
           .then((cachedResponse) => {
+
             if (cachedResponse) {
               return cachedResponse;
             }
 
-            return caches.match(
-              "./index.html"
+            if (
+              event.request.mode ===
+              "navigate"
+            ) {
+              return caches.match(
+                "./index.html"
+              );
+            }
+
+            return new Response(
+              "Offline",
+              {
+                status: 503,
+                statusText: "Offline"
+              }
             );
           });
       })
