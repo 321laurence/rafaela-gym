@@ -5,16 +5,18 @@
 
   <meta
     name="viewport"
-    content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+    content="width=device-width, initial-scale=1, viewport-fit=cover"
   >
 
-  <title>Rafaela Gym</title>
+  <meta
+    name="theme-color"
+    content="#11152f"
+  >
 
-  <link rel="manifest" href="./manifest.json">
-
-  <meta name="theme-color" content="#13162a">
-
-  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta
+    name="apple-mobile-web-app-capable"
+    content="yes"
+  >
 
   <meta
     name="apple-mobile-web-app-status-bar-style"
@@ -26,323 +28,1663 @@
     content="Rafaela Gym"
   >
 
+  <title>Rafaela Gym</title>
+
+  <link
+    rel="manifest"
+    href="./manifest.json"
+  >
+
+  <link
+    rel="apple-touch-icon"
+    href="./icon-192.png"
+  >
+
   <style>
+    :root {
+      --bg: #090c1d;
+      --bg-2: #10152d;
+      --panel: #151b39;
+      --panel-2: #1b2245;
+      --panel-3: #20294f;
+
+      --text: #f8f9ff;
+      --muted: #aab4db;
+      --soft: #7f8aba;
+
+      --accent: #b7a0ff;
+      --accent-2: #8468ef;
+      --accent-soft: rgba(183, 160, 255, 0.14);
+
+      --green: #58c58a;
+      --red: #e36a7b;
+      --blue: #6f9de8;
+      --gold: #e0ad52;
+
+      --border: rgba(183, 196, 255, 0.15);
+      --shadow: 0 18px 50px rgba(0, 0, 0, 0.24);
+
+      --radius: 22px;
+      --radius-small: 15px;
+    }
+
     * {
       box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    [hidden] {
+      display: none !important;
+    }
+
+    html {
+      min-height: 100%;
+      background: var(--bg);
+      color-scheme: dark;
     }
 
     body {
       margin: 0;
       min-height: 100vh;
-      font-family: Arial, Helvetica, sans-serif;
-      color: #ffffff;
-      background: linear-gradient(
-        180deg,
-        #13162a 0%,
-        #0d1020 100%
-      );
+      min-height: 100dvh;
+
+      font-family:
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        Roboto,
+        Helvetica,
+        Arial,
+        sans-serif;
+
+      color: var(--text);
+
+      background:
+        radial-gradient(
+          circle at 50% -10%,
+          rgba(131, 103, 237, 0.18),
+          transparent 34%
+        ),
+        linear-gradient(
+          180deg,
+          #11152f 0%,
+          #090c1d 70%
+        );
+
+      overflow-x: hidden;
     }
 
-    .app {
-      width: min(100%, 760px);
+    button {
+      font: inherit;
+    }
+
+    button,
+    [role="button"] {
+      touch-action: manipulation;
+    }
+
+    .app-shell {
+      width: min(100%, 920px);
       margin: 0 auto;
-      padding: 18px;
+
+      padding:
+        calc(env(safe-area-inset-top) + 18px)
+        18px
+        calc(110px + env(safe-area-inset-bottom));
     }
 
-    .header {
+    .app-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+
+      margin-bottom: 24px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 13px;
+    }
+
+    .brand-icon {
+      width: 50px;
+      height: 50px;
+
+      border-radius: 16px;
+
+      object-fit: cover;
+
+      box-shadow:
+        0 0 0 1px rgba(255, 255, 255, 0.08),
+        0 10px 28px rgba(0, 0, 0, 0.25);
+    }
+
+    .brand-kicker {
+      margin: 0 0 2px;
+
+      color: var(--accent);
+
+      font-size: 11px;
+      font-weight: 800;
+
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .brand-title {
+      margin: 0;
+
+      font-size: 22px;
+      line-height: 1;
+    }
+
+    .version-pill {
+      padding: 7px 10px;
+
+      border: 1px solid var(--border);
+      border-radius: 999px;
+
+      background: rgba(255, 255, 255, 0.04);
+
+      color: var(--muted);
+
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .screen {
+      animation: screenIn 0.2s ease;
+    }
+
+    @keyframes screenIn {
+      from {
+        opacity: 0;
+        transform: translateY(5px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .hero {
+      padding: 25px;
+
+      border: 1px solid var(--border);
+      border-radius: 26px;
+
+      background:
+        linear-gradient(
+          140deg,
+          rgba(181, 157, 255, 0.14),
+          rgba(255, 255, 255, 0.025)
+        ),
+        var(--panel);
+
+      box-shadow: var(--shadow);
+
       margin-bottom: 18px;
     }
 
     .eyebrow {
-      color: #b9a9ff;
-      font-size: 13px;
-      font-weight: 700;
-      letter-spacing: 1px;
+      display: inline-block;
+
+      color: var(--accent);
+
+      font-size: 11px;
+      font-weight: 850;
+
+      letter-spacing: 0.11em;
       text-transform: uppercase;
     }
 
-    h1 {
-      margin: 5px 0 6px;
-      font-size: 30px;
+    .hero h1 {
+      margin:
+        9px
+        0
+        9px;
+
+      font-size:
+        clamp(
+          30px,
+          7vw,
+          48px
+        );
+
+      line-height: 1.02;
     }
 
-    .subtitle {
+    .hero p {
       margin: 0;
-      color: #b9bdd1;
-      line-height: 1.5;
+
+      color: var(--muted);
+
+      font-size: 15px;
+      line-height: 1.55;
     }
 
     .card {
-      margin-bottom: 15px;
-      padding: 16px;
-      border: 1px solid #303652;
-      border-radius: 18px;
-      background: #181c33;
-    }
+      padding: 21px;
 
-    .top-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      gap: 14px;
-    }
-
-    .small-label {
-      color: #9ea5c3;
-      font-size: 13px;
-    }
-
-    .focus {
-      margin-top: 6px;
-      font-size: 18px;
-      font-weight: 700;
-      line-height: 1.4;
-    }
-
-    .score-box {
-      min-width: 86px;
-      padding: 10px;
-      text-align: center;
-      border: 1px solid #303652;
-      border-radius: 14px;
-      background: #101426;
-    }
-
-    .score-number {
-      font-size: 25px;
-      font-weight: 700;
-    }
-
-    .score-label {
-      margin-top: 2px;
-      color: #9ea5c3;
-      font-size: 11px;
-    }
-
-    .progress {
-      height: 7px;
-      margin-top: 12px;
-      overflow: hidden;
-      border-radius: 10px;
-      background: #101426;
-    }
-
-    .progress-fill {
-      width: 20%;
-      height: 100%;
-      background: #bda7ff;
-      transition: width 0.3s ease;
-    }
-
-    .battlefield {
-      position: relative;
-      height: 430px;
-      overflow: hidden;
-      border: 1px solid #3a4060;
-      border-radius: 18px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
 
       background:
-        radial-gradient(
-          circle at center,
-          rgba(100, 86, 180, 0.15),
-          transparent 34%
-        ),
         linear-gradient(
-          135deg,
-          #202b37 0%,
-          #16222d 50%,
-          #202b37 100%
-        );
+          145deg,
+          rgba(255, 255, 255, 0.025),
+          transparent
+        ),
+        var(--panel);
 
-      touch-action: manipulation;
-      user-select: none;
-      cursor: crosshair;
+      margin-bottom: 16px;
     }
 
-    .river {
-      position: absolute;
-      left: -20%;
-      top: 47%;
-      width: 140%;
-      height: 55px;
-      transform: rotate(-14deg);
-      background: rgba(71, 112, 145, 0.22);
-      border-top: 1px solid rgba(136, 183, 221, 0.18);
-      border-bottom: 1px solid rgba(136, 183, 221, 0.18);
-      pointer-events: none;
-    }
-
-    .objective-zone {
-      position: absolute;
-      left: 50%;
-      top: 33%;
-      width: 115px;
-      height: 115px;
-      transform: translate(-50%, -50%);
-      border: 1px dashed rgba(255, 255, 255, 0.18);
-      border-radius: 50%;
-      pointer-events: none;
-    }
-
-    .unit {
-      position: absolute;
-      width: 48px;
-      height: 48px;
-      transform: translate(-50%, -50%);
+    .card-title-row {
       display: flex;
-      align-items: center;
-      justify-content: center;
-      border: 2px solid rgba(255, 255, 255, 0.4);
-      border-radius: 50%;
-      font-size: 11px;
-      font-weight: 700;
-      z-index: 5;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 18px;
 
-      transition:
-        left 0.18s ease,
-        top 0.18s ease;
+      margin-bottom: 15px;
     }
 
-    #rafaela {
-      width: 52px;
-      height: 52px;
-      background: #c9b5ff;
-      color: #21163f;
-      border: 3px solid #ffffff;
-      box-shadow: 0 0 0 6px rgba(201, 181, 255, 0.12);
-      z-index: 10;
+    .card h2,
+    .card h3 {
+      margin:
+        4px
+        0
+        0;
     }
 
-    #ally {
-      background: #4fa873;
+    .card h2 {
+      font-size: 23px;
     }
 
-    #frontliner {
-      background: #557dc4;
+    .card h3 {
+      font-size: 17px;
     }
 
-    #threat {
-      background: #ba4f63;
+    .small-muted {
+      color: var(--muted);
+
+      font-size: 13px;
+      line-height: 1.5;
     }
 
-    #objective {
-      background: #c99b46;
-      color: #1b1408;
+    .recommendation-name {
+      margin:
+        7px
+        0
+        8px;
+
+      font-size: 26px;
+      line-height: 1.15;
     }
 
-    .legend {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-top: 12px;
-    }
+    .reason-text {
+      margin:
+        0
+        0
+        16px;
 
-    .legend-item {
-      padding: 7px 10px;
-      border-radius: 999px;
-      background: #101426;
-      color: #c4c8db;
-      font-size: 12px;
-    }
+      color: var(--muted);
 
-    .buttons {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-      margin-top: 14px;
-    }
-
-    button {
-      min-height: 48px;
-      border: none;
-      border-radius: 14px;
-      font-size: 15px;
-      font-weight: 700;
-      cursor: pointer;
-    }
-
-    .primary {
-      background: #bda7ff;
-      color: #1e1638;
-    }
-
-    .secondary {
-      background: #272d48;
-      color: #ffffff;
-      border: 1px solid #3b4262;
-    }
-
-    button:disabled {
-      opacity: 0.45;
-      cursor: not-allowed;
-    }
-
-    .feedback {
-      display: none;
-    }
-
-    .feedback.show {
-      display: block;
-    }
-
-    .result-title {
-      margin-bottom: 14px;
-      font-size: 20px;
-      font-weight: 700;
-    }
-
-    .feedback-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 14px;
-    }
-
-    .feedback-section strong {
-      display: block;
-      margin-bottom: 5px;
-      color: #b8a9ff;
-      font-size: 12px;
-      letter-spacing: 0.7px;
-      text-transform: uppercase;
-    }
-
-    .feedback-section p {
-      margin: 0;
-      color: #d2d5e2;
       font-size: 14px;
       line-height: 1.5;
     }
 
-    .doctrine {
-      text-align: center;
-      color: #bac0d6;
-      font-size: 13px;
-      line-height: 1.7;
+    .chip-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+
+      margin-top: 14px;
     }
 
-    .doctrine strong {
-      color: #ffffff;
+    .chip {
+      padding:
+        7px
+        10px;
+
+      border:
+        1px solid
+        rgba(185, 165, 255, 0.19);
+
+      border-radius: 999px;
+
+      background:
+        rgba(183, 160, 255, 0.09);
+
+      color:
+        #d7cbff;
+
+      font-size: 12px;
+      font-weight: 700;
     }
 
-    @media (max-width: 560px) {
-      .app {
-        padding: 12px;
+    .stat-grid {
+      display: grid;
+      grid-template-columns:
+        repeat(2, minmax(0, 1fr));
+
+      gap: 11px;
+
+      margin:
+        16px
+        0;
+    }
+
+    .stat {
+      min-height: 104px;
+
+      padding: 16px;
+
+      border:
+        1px solid
+        var(--border);
+
+      border-radius:
+        18px;
+
+      background:
+        rgba(255, 255, 255, 0.028);
+    }
+
+    .stat-value {
+      display: block;
+
+      margin-bottom: 6px;
+
+      font-size: 29px;
+      font-weight: 850;
+    }
+
+    .stat-label {
+      color: var(--muted);
+
+      font-size: 12px;
+      line-height: 1.3;
+    }
+
+    .primary-button,
+    .secondary-button,
+    .ghost-button {
+      width: 100%;
+
+      min-height: 54px;
+
+      border-radius: 17px;
+
+      cursor: pointer;
+
+      font-weight: 800;
+
+      transition:
+        transform 0.12s ease,
+        opacity 0.12s ease;
+    }
+
+    .primary-button:active,
+    .secondary-button:active,
+    .ghost-button:active {
+      transform: scale(0.985);
+    }
+
+    .primary-button {
+      border: 0;
+
+      color: #101020;
+
+      background:
+        linear-gradient(
+          135deg,
+          #c7b5ff,
+          #9f86fb
+        );
+
+      box-shadow:
+        0 12px 28px
+        rgba(131, 103, 237, 0.2);
+    }
+
+    .secondary-button {
+      margin-top: 10px;
+
+      border:
+        1px solid
+        rgba(182, 161, 255, 0.23);
+
+      color: var(--text);
+
+      background:
+        rgba(183, 160, 255, 0.08);
+    }
+
+    .ghost-button {
+      border:
+        1px solid
+        var(--border);
+
+      color: var(--muted);
+
+      background:
+        rgba(255, 255, 255, 0.025);
+    }
+
+    .section-title {
+      margin:
+        26px
+        0
+        13px;
+
+      font-size: 19px;
+    }
+
+    .loop {
+      display: flex;
+      gap: 6px;
+      overflow-x: auto;
+
+      padding:
+        5px
+        0
+        9px;
+
+      scrollbar-width: none;
+    }
+
+    .loop::-webkit-scrollbar {
+      display: none;
+    }
+
+    .loop-step {
+      flex: 0 0 auto;
+
+      padding:
+        8px
+        10px;
+
+      border:
+        1px solid
+        var(--border);
+
+      border-radius:
+        12px;
+
+      background:
+        rgba(255, 255, 255, 0.03);
+
+      color: var(--muted);
+
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .training-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+
+      margin-bottom: 17px;
+    }
+
+    .rep-pill {
+      padding:
+        8px
+        11px;
+
+      border-radius:
+        999px;
+
+      background:
+        var(--accent-soft);
+
+      color:
+        #d4c8ff;
+
+      font-size:
+        12px;
+
+      font-weight:
+        800;
+    }
+
+    .scenario-meta {
+      display: grid;
+      grid-template-columns:
+        1fr
+        1fr;
+
+      gap: 9px;
+
+      margin:
+        15px
+        0;
+    }
+
+    .meta-box {
+      padding: 12px;
+
+      border:
+        1px solid
+        var(--border);
+
+      border-radius:
+        14px;
+
+      background:
+        rgba(255, 255, 255, 0.025);
+    }
+
+    .meta-label {
+      display: block;
+
+      margin-bottom: 4px;
+
+      color:
+        var(--soft);
+
+      font-size:
+        10px;
+
+      text-transform:
+        uppercase;
+
+      letter-spacing:
+        0.08em;
+    }
+
+    .meta-value {
+      font-size:
+        13px;
+
+      font-weight:
+        750;
+    }
+
+    .scenario-instruction {
+      margin:
+        9px
+        0
+        5px;
+
+      color:
+        #e7e3ff;
+
+      font-size:
+        17px;
+
+      font-weight:
+        700;
+
+      line-height:
+        1.42;
+    }
+
+    .information-grid {
+      display: grid;
+      gap: 10px;
+
+      margin:
+        16px
+        0;
+    }
+
+    .info-block {
+      padding:
+        14px;
+
+      border:
+        1px solid
+        var(--border);
+
+      border-radius:
+        16px;
+
+      background:
+        rgba(255, 255, 255, 0.023);
+    }
+
+    .info-block h4 {
+      margin:
+        0
+        0
+        8px;
+
+      font-size:
+        12px;
+    }
+
+    .info-block ul {
+      padding-left:
+        18px;
+
+      margin:
+        0;
+
+      color:
+        var(--muted);
+
+      font-size:
+        12px;
+
+      line-height:
+        1.55;
+    }
+
+    .battlefield-wrap {
+      margin-top:
+        14px;
+    }
+
+    .battlefield-label {
+      margin:
+        0
+        0
+        8px;
+
+      color:
+        var(--muted);
+
+      font-size:
+        12px;
+    }
+
+    #battlefield {
+      position:
+        relative;
+
+      width:
+        100%;
+
+      aspect-ratio:
+        1.15 / 1;
+
+      min-height:
+        350px;
+
+      overflow:
+        hidden;
+
+      border:
+        1px solid
+        rgba(155, 194, 226, 0.22);
+
+      border-radius:
+        22px;
+
+      background:
+        radial-gradient(
+          circle at 50% 50%,
+          rgba(77, 132, 109, 0.09),
+          transparent 40%
+        ),
+        linear-gradient(
+          140deg,
+          #142229,
+          #172733
+        );
+
+      cursor:
+        crosshair;
+
+      touch-action:
+        none;
+
+      user-select:
+        none;
+
+      box-shadow:
+        inset 0 0 60px
+        rgba(0, 0, 0, 0.2);
+    }
+
+    .map-river {
+      position:
+        absolute;
+
+      left:
+        -10%;
+
+      top:
+        44%;
+
+      width:
+        120%;
+
+      height:
+        14%;
+
+      transform:
+        rotate(-13deg);
+
+      background:
+        rgba(90, 147, 194, 0.14);
+
+      border-top:
+        1px solid
+        rgba(104, 169, 221, 0.18);
+
+      border-bottom:
+        1px solid
+        rgba(104, 169, 221, 0.18);
+
+      pointer-events:
+        none;
+    }
+
+    .map-bush {
+      position:
+        absolute;
+
+      width:
+        18%;
+
+      height:
+        10%;
+
+      border-radius:
+        50%;
+
+      background:
+        rgba(85, 142, 105, 0.13);
+
+      border:
+        1px dashed
+        rgba(114, 179, 137, 0.14);
+
+      pointer-events:
+        none;
+    }
+
+    .bush-one {
+      left:
+        12%;
+
+      top:
+        21%;
+    }
+
+    .bush-two {
+      right:
+        11%;
+
+      bottom:
+        20%;
+    }
+
+    .battle-actor {
+      position:
+        absolute;
+
+      left:
+        50%;
+
+      top:
+        50%;
+
+      transform:
+        translate(-50%, -50%);
+
+      display:
+        grid;
+
+      place-items:
+        center;
+
+      width:
+        52px;
+
+      height:
+        52px;
+
+      border:
+        2px solid
+        rgba(255, 255, 255, 0.42);
+
+      border-radius:
+        50%;
+
+      color:
+        white;
+
+      font-size:
+        11px;
+
+      font-weight:
+        850;
+
+      box-shadow:
+        0 8px 18px
+        rgba(0, 0, 0, 0.28);
+
+      z-index:
+        5;
+    }
+
+    .rafaela-marker {
+      width:
+        58px;
+
+      height:
+        58px;
+
+      background:
+        #b5a0ff;
+
+      color:
+        #221947;
+
+      border-color:
+        #f2edff;
+
+      box-shadow:
+        0 0 0 7px
+        rgba(181, 160, 255, 0.13),
+        0 9px 22px
+        rgba(0, 0, 0, 0.32);
+
+      font-size:
+        16px;
+
+      z-index:
+        8;
+
+      transition:
+        left 0.11s ease,
+        top 0.11s ease;
+    }
+
+    .actor-ally {
+      background:
+        #4fae7a;
+    }
+
+    .actor-frontline {
+      background:
+        #5685cf;
+    }
+
+    .actor-damage {
+      background:
+        #6b74d8;
+    }
+
+    .actor-threat {
+      background:
+        #c95969;
+    }
+
+    .actor-enemy {
+      background:
+        #ae6374;
+    }
+
+    .actor-objective {
+      background:
+        #d9a644;
+
+      color:
+        #201300;
+    }
+
+    .actor-neutral {
+      background:
+        #66728e;
+    }
+
+    .unknown-threat-marker {
+      position:
+        absolute;
+
+      top:
+        38%;
+
+      transform:
+        translate(-50%, -50%);
+
+      width:
+        47px;
+
+      height:
+        47px;
+
+      display:
+        grid;
+
+      place-items:
+        center;
+
+      border:
+        2px dashed
+        rgba(238, 122, 138, 0.78);
+
+      border-radius:
+        50%;
+
+      background:
+        rgba(198, 80, 96, 0.09);
+
+      color:
+        #ff9caa;
+
+      font-size:
+        21px;
+
+      font-weight:
+        900;
+
+      z-index:
+        4;
+    }
+
+    .legend {
+      display:
+        flex;
+
+      flex-wrap:
+        wrap;
+
+      gap:
+        7px;
+
+      margin:
+        11px
+        0
+        17px;
+    }
+
+    .legend span {
+      padding:
+        6px
+        9px;
+
+      border-radius:
+        999px;
+
+      background:
+        rgba(255, 255, 255, 0.035);
+
+      color:
+        var(--muted);
+
+      font-size:
+        10px;
+    }
+
+    .feedback-panel {
+      margin-top:
+        16px;
+
+      padding:
+        20px;
+
+      border:
+        1px solid
+        rgba(186, 165, 255, 0.21);
+
+      border-radius:
+        21px;
+
+      background:
+        linear-gradient(
+          140deg,
+          rgba(183, 160, 255, 0.09),
+          transparent
+        ),
+        var(--panel-2);
+    }
+
+    .feedback-score-row {
+      display:
+        flex;
+
+      align-items:
+        center;
+
+      justify-content:
+        space-between;
+
+      gap:
+        15px;
+
+      margin-bottom:
+        17px;
+    }
+
+    .feedback-score {
+      display:
+        flex;
+
+      align-items:
+        baseline;
+
+      gap:
+        4px;
+    }
+
+    .feedback-score strong {
+      font-size:
+        35px;
+    }
+
+    .feedback-score span {
+      color:
+        var(--muted);
+
+      font-size:
+        12px;
+    }
+
+    .correction-badge {
+      padding:
+        8px
+        10px;
+
+      border-radius:
+        12px;
+
+      background:
+        rgba(227, 106, 123, 0.1);
+
+      color:
+        #f0a8b2;
+
+      font-size:
+        11px;
+
+      font-weight:
+        800;
+    }
+
+    .feedback-grid {
+      display:
+        grid;
+
+      gap:
+        10px;
+    }
+
+    .feedback-item {
+      padding:
+        13px;
+
+      border:
+        1px solid
+        var(--border);
+
+      border-radius:
+        14px;
+
+      background:
+        rgba(255, 255, 255, 0.025);
+    }
+
+    .feedback-item strong {
+      display:
+        block;
+
+      margin-bottom:
+        4px;
+
+      color:
+        #c9bbff;
+
+      font-size:
+        11px;
+
+      text-transform:
+        uppercase;
+
+      letter-spacing:
+        0.07em;
+    }
+
+    .feedback-item p {
+      margin:
+        0;
+
+      color:
+        var(--muted);
+
+      font-size:
+        13px;
+
+      line-height:
+        1.5;
+    }
+
+    .metrics {
+      display:
+        grid;
+
+      gap:
+        11px;
+
+      margin-top:
+        17px;
+    }
+
+    .metric {
+      --score:
+        0%;
+
+      padding:
+        12px;
+
+      border-radius:
+        14px;
+
+      background:
+        rgba(0, 0, 0, 0.13);
+    }
+
+    .metric-top {
+      display:
+        flex;
+
+      justify-content:
+        space-between;
+
+      gap:
+        12px;
+
+      margin-bottom:
+        8px;
+
+      color:
+        var(--muted);
+
+      font-size:
+        11px;
+    }
+
+    .metric-value {
+      color:
+        var(--text);
+
+      font-weight:
+        800;
+    }
+
+    .metric-track {
+      height:
+        5px;
+
+      overflow:
+        hidden;
+
+      border-radius:
+        999px;
+
+      background:
+        rgba(255, 255, 255, 0.07);
+    }
+
+    .metric-fill {
+      width:
+        var(--score);
+
+      height:
+        100%;
+
+      border-radius:
+        inherit;
+
+      background:
+        linear-gradient(
+          90deg,
+          #7560dc,
+          #b8a4ff
+        );
+
+      transition:
+        width 0.3s ease;
+    }
+
+    .evidence-note {
+      margin:
+        14px
+        0
+        0;
+
+      color:
+        var(--soft);
+
+      font-size:
+        10px;
+
+      line-height:
+        1.45;
+    }
+
+    .button-row {
+      display:
+        grid;
+
+      grid-template-columns:
+        1fr
+        1fr;
+
+      gap:
+        10px;
+
+      margin-top:
+        15px;
+    }
+
+    .progress-stage-grid {
+      display:
+        grid;
+
+      grid-template-columns:
+        repeat(2, minmax(0, 1fr));
+
+      gap:
+        10px;
+    }
+
+    .progress-stage {
+      padding:
+        15px;
+
+      border:
+        1px solid
+        var(--border);
+
+      border-radius:
+        17px;
+
+      background:
+        rgba(255, 255, 255, 0.026);
+    }
+
+    .progress-stage strong {
+      display:
+        block;
+
+      margin-bottom:
+        5px;
+
+      font-size:
+        25px;
+    }
+
+    .progress-stage span {
+      color:
+        var(--muted);
+
+      font-size:
+        11px;
+    }
+
+    .review-list {
+      display:
+        grid;
+
+      gap:
+        9px;
+    }
+
+    .review-item {
+      display:
+        flex;
+
+      align-items:
+        center;
+
+      justify-content:
+        space-between;
+
+      gap:
+        12px;
+
+      padding:
+        13px;
+
+      border:
+        1px solid
+        var(--border);
+
+      border-radius:
+        15px;
+
+      background:
+        rgba(255, 255, 255, 0.025);
+    }
+
+    .review-item strong {
+      display:
+        block;
+
+      font-size:
+        13px;
+    }
+
+    .review-item span {
+      display:
+        block;
+
+      margin-top:
+        3px;
+
+      color:
+        var(--muted);
+
+      font-size:
+        10px;
+    }
+
+    .priority-pill {
+      min-width:
+        43px;
+
+      padding:
+        7px
+        8px;
+
+      text-align:
+        center;
+
+      border-radius:
+        999px;
+
+      background:
+        var(--accent-soft);
+
+      color:
+        var(--accent);
+
+      font-size:
+        11px;
+
+      font-weight:
+        850;
+    }
+
+    #doctrineDomains {
+      display:
+        grid;
+
+      gap:
+        12px;
+    }
+
+    .doctrine-card {
+      padding:
+        18px;
+
+      border:
+        1px solid
+        var(--border);
+
+      border-radius:
+        19px;
+
+      background:
+        var(--panel);
+    }
+
+    .doctrine-card h3 {
+      margin:
+        7px
+        0
+        8px;
+
+      font-size:
+        17px;
+    }
+
+    .doctrine-card p {
+      margin:
+        0;
+
+      color:
+        var(--muted);
+
+      font-size:
+        12px;
+
+      line-height:
+        1.55;
+    }
+
+    .completion-icon {
+      width:
+        80px;
+
+      height:
+        80px;
+
+      display:
+        grid;
+
+      place-items:
+        center;
+
+      margin:
+        15px
+        auto
+        18px;
+
+      border-radius:
+        28px;
+
+      background:
+        linear-gradient(
+          145deg,
+          rgba(183, 160, 255, 0.2),
+          rgba(183, 160, 255, 0.06)
+        );
+
+      color:
+        var(--accent);
+
+      font-size:
+        37px;
+    }
+
+    .complete-title {
+      margin:
+        0
+        0
+        8px;
+
+      text-align:
+        center;
+
+      font-size:
+        30px;
+    }
+
+    .complete-subtitle {
+      margin:
+        0
+        0
+        20px;
+
+      text-align:
+        center;
+
+      color:
+        var(--muted);
+
+      font-size:
+        14px;
+
+      line-height:
+        1.5;
+    }
+
+    .bottom-nav {
+      position:
+        fixed;
+
+      left:
+        50%;
+
+      bottom:
+        calc(12px + env(safe-area-inset-bottom));
+
+      transform:
+        translateX(-50%);
+
+      z-index:
+        50;
+
+      display:
+        grid;
+
+      grid-template-columns:
+        repeat(3, 1fr);
+
+      width:
+        min(
+          calc(100% - 28px),
+          620px
+        );
+
+      padding:
+        7px;
+
+      border:
+        1px solid
+        rgba(183, 196, 255, 0.16);
+
+      border-radius:
+        21px;
+
+      background:
+        rgba(16, 21, 45, 0.92);
+
+      backdrop-filter:
+        blur(22px);
+
+      -webkit-backdrop-filter:
+        blur(22px);
+
+      box-shadow:
+        0 15px 42px
+        rgba(0, 0, 0, 0.35);
+    }
+
+    .nav-button {
+      min-height:
+        53px;
+
+      border:
+        0;
+
+      border-radius:
+        15px;
+
+      background:
+        transparent;
+
+      color:
+        var(--soft);
+
+      cursor:
+        pointer;
+
+      font-size:
+        11px;
+
+      font-weight:
+        750;
+    }
+
+    .nav-button.active {
+      background:
+        var(--accent-soft);
+
+      color:
+        #d6cbff;
+    }
+
+    .fatal-error {
+      position:
+        fixed;
+
+      inset:
+        0;
+
+      z-index:
+        100;
+
+      display:
+        grid;
+
+      place-items:
+        center;
+
+      padding:
+        24px;
+
+      background:
+        rgba(4, 6, 16, 0.94);
+    }
+
+    .fatal-box {
+      width:
+        min(100%, 430px);
+
+      padding:
+        24px;
+
+      border:
+        1px solid
+        rgba(227, 106, 123, 0.3);
+
+      border-radius:
+        20px;
+
+      background:
+        var(--panel);
+
+      text-align:
+        center;
+    }
+
+    .fatal-box h2 {
+      margin-top:
+        0;
+    }
+
+    .fatal-box p {
+      color:
+        var(--muted);
+    }
+
+    @media (min-width: 700px) {
+      .stat-grid {
+        grid-template-columns:
+          repeat(4, 1fr);
       }
 
-      h1 {
-        font-size: 26px;
+      .information-grid {
+        grid-template-columns:
+          repeat(3, 1fr);
       }
 
-      .battlefield {
-        height: 390px;
+      .progress-stage-grid {
+        grid-template-columns:
+          repeat(3, 1fr);
       }
 
-      .feedback-grid {
-        grid-template-columns: 1fr;
+      #doctrineDomains {
+        grid-template-columns:
+          repeat(2, 1fr);
       }
 
-      .buttons {
-        grid-template-columns: 1fr;
+      #battlefield {
+        min-height:
+          520px;
       }
     }
   </style>
@@ -350,965 +1692,1160 @@
 
 <body>
 
-  <main class="app">
+  <main class="app-shell">
 
-    <header class="header">
+    <header class="app-header">
 
-      <div class="eyebrow">
-        Universal Support Doctrine
+      <div class="brand">
+
+        <img
+          class="brand-icon"
+          src="./icon-192.png"
+          alt=""
+        >
+
+        <div>
+
+          <p class="brand-kicker">
+            Universal Support Doctrine
+          </p>
+
+          <h1 class="brand-title">
+            Rafaela Gym
+          </h1>
+
+        </div>
+
       </div>
 
-      <h1>
-        Rafaela Gym
-      </h1>
-
-      <p class="subtitle">
-        Train Rafaela decisions through repeated execution,
-        not quizzes.
-      </p>
+      <span class="version-pill">
+        V2
+      </span>
 
     </header>
 
 
-    <section class="card">
+    <!-- =====================================
+         HOME
+    ====================================== -->
 
-      <div class="top-row">
+    <section
+      class="screen"
+      data-screen="home"
+    >
 
-        <div>
+      <div class="hero">
 
-          <div class="small-label">
-            Positioning Gym · Rep
-            <span id="rep">1</span>
-            / 5
-          </div>
+        <span class="eyebrow">
+          Adaptive practical training
+        </span>
 
-          <div
-            class="focus"
-            id="focus"
+        <h1>
+          Train decisions,
+          not memorization.
+        </h1>
+
+        <p>
+          Build one consistent Rafaela playstyle
+          through fundamentals, execution standards,
+          adaptive decision-making, and repeated
+          application.
+        </p>
+
+      </div>
+
+
+      <article class="card">
+
+        <span class="eyebrow">
+          Today's priority
+        </span>
+
+        <h2
+          id="recommendedConcept"
+          class="recommendation-name"
+        >
+          Preparing...
+        </h2>
+
+        <p
+          id="recommendedReason"
+          class="reason-text"
+        >
+          Rafaela Gym is selecting your next
+          high-value concept.
+        </p>
+
+        <div class="chip-row">
+
+          <span class="chip">
+            <span id="recommendedDomain">
+              Foundation
+            </span>
+          </span>
+
+          <span class="chip">
+            <span id="recommendedActivity">
+              Apply
+            </span>
+          </span>
+
+        </div>
+
+        <button
+          id="startWorkoutButton"
+          class="primary-button"
+          type="button"
+          style="margin-top: 18px;"
+        >
+          Start Today's Workout
+        </button>
+
+        <button
+          id="quickTrainButton"
+          class="secondary-button"
+          type="button"
+        >
+          Quick 3-Rep Gym
+        </button>
+
+      </article>
+
+
+      <div class="stat-grid">
+
+        <div class="stat">
+
+          <strong
+            id="reviewsDue"
+            class="stat-value"
           >
-            Support the objective without becoming the easiest target.
-          </div>
+            0
+          </strong>
+
+          <span class="stat-label">
+            Reviews due
+          </span>
 
         </div>
 
 
-        <div class="score-box">
+        <div class="stat">
 
-          <div
-            class="score-number"
-            id="score"
+          <strong
+            id="totalConcepts"
+            class="stat-value"
           >
-            —
-          </div>
+            0
+          </strong>
 
-          <div class="score-label">
-            position
-          </div>
+          <span class="stat-label">
+            Concepts tracked
+          </span>
+
+        </div>
+
+
+        <div class="stat">
+
+          <strong
+            id="appliedConcepts"
+            class="stat-value"
+          >
+            0
+          </strong>
+
+          <span class="stat-label">
+            Applied concepts
+          </span>
+
+        </div>
+
+
+        <div class="stat">
+
+          <strong
+            id="gameplayEvidenceCount"
+            class="stat-value"
+          >
+            0
+          </strong>
+
+          <span class="stat-label">
+            Gameplay-evidence concepts
+          </span>
 
         </div>
 
       </div>
 
 
-      <div class="progress">
+      <h2 class="section-title">
+        Decision Loop
+      </h2>
 
-        <div
-          class="progress-fill"
-          id="progressFill"
-        ></div>
+      <div class="loop">
+
+        <span class="loop-step">
+          Observe
+        </span>
+
+        <span class="loop-step">
+          Assess
+        </span>
+
+        <span class="loop-step">
+          Prioritize
+        </span>
+
+        <span class="loop-step">
+          Position
+        </span>
+
+        <span class="loop-step">
+          Act
+        </span>
+
+        <span class="loop-step">
+          Verify
+        </span>
+
+        <span class="loop-step">
+          Reassess
+        </span>
 
       </div>
+
+
+      <article class="card">
+
+        <span class="eyebrow">
+          Training standard
+        </span>
+
+        <h3>
+          Knowledge is not yet gameplay skill.
+        </h3>
+
+        <p class="small-muted">
+          Rafaela Gym separates recognition,
+          explanation, unfamiliar-scenario application,
+          gameplay evidence, and consistency.
+          One correct rep does not mean mastery.
+        </p>
+
+      </article>
 
     </section>
 
 
-    <section class="card">
+    <!-- =====================================
+         TRAIN
+    ====================================== -->
 
-      <div
-        class="small-label"
-        style="margin-bottom: 10px;"
-      >
-        Tap anywhere on the battlefield to move Rafaela.
-      </div>
+    <section
+      class="screen"
+      data-screen="train"
+      hidden
+    >
 
+      <div class="training-top">
 
-      <div
-        class="battlefield"
-        id="battlefield"
-      >
+        <div>
 
-        <div class="river"></div>
+          <span class="eyebrow">
+            Decision practice
+          </span>
 
-        <div class="objective-zone"></div>
+          <h2
+            id="scenarioTitle"
+            style="margin: 5px 0 0;"
+          >
+            Positioning Gym
+          </h2>
 
-
-        <div
-          class="unit"
-          id="objective"
-        >
-          OBJ
         </div>
 
-
-        <div
-          class="unit"
-          id="ally"
+        <span
+          id="repCounter"
+          class="rep-pill"
         >
-          ALLY
-        </div>
-
-
-        <div
-          class="unit"
-          id="frontliner"
-        >
-          FRONT
-        </div>
-
-
-        <div
-          class="unit"
-          id="threat"
-        >
-          THREAT
-        </div>
-
-
-        <div
-          class="unit"
-          id="rafaela"
-        >
-          R
-        </div>
+          Rep 1 / 5
+        </span>
 
       </div>
 
 
-      <div class="legend">
+      <article class="card">
 
-        <div class="legend-item">
-          R = Rafaela
+        <div class="scenario-meta">
+
+          <div class="meta-box">
+
+            <span class="meta-label">
+              Concept
+            </span>
+
+            <span
+              id="scenarioConcept"
+              class="meta-value"
+            >
+              —
+            </span>
+
+          </div>
+
+
+          <div class="meta-box">
+
+            <span class="meta-label">
+              Domain
+            </span>
+
+            <span
+              id="scenarioDomain"
+              class="meta-value"
+            >
+              —
+            </span>
+
+          </div>
+
+
+          <div class="meta-box">
+
+            <span class="meta-label">
+              Difficulty
+            </span>
+
+            <span
+              id="scenarioDifficulty"
+              class="meta-value"
+            >
+              Foundation
+            </span>
+
+          </div>
+
+
+          <div class="meta-box">
+
+            <span class="meta-label">
+              Evidence
+            </span>
+
+            <span class="meta-value">
+              Decision practice
+            </span>
+
+          </div>
+
         </div>
 
-        <div class="legend-item">
-          ALLY = priority ally
+
+        <p
+          id="scenarioInstruction"
+          class="scenario-instruction"
+        >
+          Choose Rafaela's position.
+        </p>
+
+
+        <div class="information-grid">
+
+          <div class="info-block">
+
+            <h4>
+              Facts
+            </h4>
+
+            <ul id="factsList"></ul>
+
+          </div>
+
+
+          <div class="info-block">
+
+            <h4>
+              Inferences
+            </h4>
+
+            <ul id="inferencesList"></ul>
+
+          </div>
+
+
+          <div class="info-block">
+
+            <h4>
+              Unknowns
+            </h4>
+
+            <ul id="unknownsList"></ul>
+
+          </div>
+
         </div>
 
-        <div class="legend-item">
-          FRONT = frontline
+
+        <div class="battlefield-wrap">
+
+          <p class="battlefield-label">
+            Tap the battlefield to move Rafaela.
+            Then evaluate your position.
+          </p>
+
+          <div
+            id="battlefield"
+            aria-label="Rafaela positioning training battlefield"
+          ></div>
+
+
+          <div class="legend">
+
+            <span>
+              R = Rafaela
+            </span>
+
+            <span>
+              ALLY = Priority ally
+            </span>
+
+            <span>
+              FRONT = Frontline
+            </span>
+
+            <span>
+              THREAT = Primary threat
+            </span>
+
+            <span>
+              OBJ = Objective
+            </span>
+
+            <span>
+              ? = Uncertain threat
+            </span>
+
+          </div>
+
         </div>
 
-        <div class="legend-item">
-          THREAT = enemy threat
-        </div>
-
-        <div class="legend-item">
-          OBJ = objective
-        </div>
-
-      </div>
-
-
-      <div class="buttons">
 
         <button
-          class="primary"
           id="evaluateButton"
+          class="primary-button"
+          type="button"
         >
           Evaluate Position
         </button>
 
-        <button
-          class="secondary"
-          id="nextButton"
-          disabled
-        >
-          Next Rep
-        </button>
 
-      </div>
+        <!-- FEEDBACK -->
+
+        <section
+          id="feedbackPanel"
+          class="feedback-panel"
+          hidden
+        >
+
+          <div class="feedback-score-row">
+
+            <div>
+
+              <span class="eyebrow">
+                Result
+              </span>
+
+              <h3
+                id="feedbackTitle"
+                style="margin: 5px 0 0;"
+              >
+                Position evaluated
+              </h3>
+
+            </div>
+
+
+            <div class="feedback-score">
+
+              <strong id="overallScore">
+                0
+              </strong>
+
+              <span>
+                /100
+              </span>
+
+            </div>
+
+          </div>
+
+
+          <div
+            id="mainCorrection"
+            class="correction-badge"
+          >
+            Main correction
+          </div>
+
+
+          <div
+            class="feedback-grid"
+            style="margin-top: 12px;"
+          >
+
+            <div class="feedback-item">
+
+              <strong>
+                Action
+              </strong>
+
+              <p id="feedbackAction">
+                —
+              </p>
+
+            </div>
+
+
+            <div class="feedback-item">
+
+              <strong>
+                Why
+              </strong>
+
+              <p id="feedbackReason">
+                —
+              </p>
+
+            </div>
+
+
+            <div class="feedback-item">
+
+              <strong>
+                Exception
+              </strong>
+
+              <p id="feedbackException">
+                —
+              </p>
+
+            </div>
+
+
+            <div class="feedback-item">
+
+              <strong>
+                Result check
+              </strong>
+
+              <p id="feedbackCheck">
+                —
+              </p>
+
+            </div>
+
+          </div>
+
+
+          <h3
+            style="
+              margin:
+                20px 0 10px;
+              font-size:
+                14px;
+            "
+          >
+            Decision dimensions
+          </h3>
+
+
+          <div class="metrics">
+
+            <div
+              id="metricParticipation"
+              class="metric"
+            >
+
+              <div class="metric-top">
+
+                <span>
+                  Participation
+                </span>
+
+                <span class="metric-value">
+                  0
+                </span>
+
+              </div>
+
+              <div class="metric-track">
+                <div class="metric-fill"></div>
+              </div>
+
+            </div>
+
+
+            <div
+              id="metricAllyAccess"
+              class="metric"
+            >
+
+              <div class="metric-top">
+
+                <span>
+                  Ally access
+                </span>
+
+                <span class="metric-value">
+                  0
+                </span>
+
+              </div>
+
+              <div class="metric-track">
+                <div class="metric-fill"></div>
+              </div>
+
+            </div>
+
+
+            <div
+              id="metricThreatSafety"
+              class="metric"
+            >
+
+              <div class="metric-top">
+
+                <span>
+                  Threat safety
+                </span>
+
+                <span class="metric-value">
+                  0
+                </span>
+
+              </div>
+
+              <div class="metric-track">
+                <div class="metric-fill"></div>
+              </div>
+
+            </div>
+
+
+            <div
+              id="metricObjectiveAccess"
+              class="metric"
+            >
+
+              <div class="metric-top">
+
+                <span>
+                  Objective access
+                </span>
+
+                <span class="metric-value">
+                  0
+                </span>
+
+              </div>
+
+              <div class="metric-track">
+                <div class="metric-fill"></div>
+              </div>
+
+            </div>
+
+
+            <div
+              id="metricEscapeSpace"
+              class="metric"
+            >
+
+              <div class="metric-top">
+
+                <span>
+                  Escape space
+                </span>
+
+                <span class="metric-value">
+                  0
+                </span>
+
+              </div>
+
+              <div class="metric-track">
+                <div class="metric-fill"></div>
+              </div>
+
+            </div>
+
+
+            <div
+              id="metricUncertainty"
+              class="metric"
+            >
+
+              <div class="metric-top">
+
+                <span>
+                  Uncertainty safety
+                </span>
+
+                <span class="metric-value">
+                  0
+                </span>
+
+              </div>
+
+              <div class="metric-track">
+                <div class="metric-fill"></div>
+              </div>
+
+            </div>
+
+          </div>
+
+
+          <p
+            id="evidenceLimit"
+            class="evidence-note"
+          ></p>
+
+        </section>
+
+
+        <div class="button-row">
+
+          <button
+            id="nextRepButton"
+            class="primary-button"
+            type="button"
+            hidden
+          >
+            Next Rep
+          </button>
+
+          <button
+            id="finishWorkoutButton"
+            class="primary-button"
+            type="button"
+            hidden
+          >
+            Finish Workout
+          </button>
+
+        </div>
+
+      </article>
 
     </section>
 
+
+    <!-- =====================================
+         PROGRESS
+    ====================================== -->
 
     <section
-      class="card feedback"
-      id="feedback"
+      class="screen"
+      data-screen="progress"
+      hidden
     >
 
-      <div
-        class="result-title"
-        id="resultTitle"
-      ></div>
+      <div class="hero">
+
+        <span class="eyebrow">
+          Learning ledger
+        </span>
+
+        <h1>
+          Progress
+        </h1>
+
+        <p>
+          Progress is tracked by evidence level,
+          not just wins, scores, or one correct answer.
+        </p>
+
+      </div>
 
 
-      <div class="feedback-grid">
+      <div class="progress-stage-grid">
 
-        <div class="feedback-section">
+        <div class="progress-stage">
 
-          <strong>
-            Cue
+          <strong id="progressTotal">
+            0
           </strong>
 
-          <p id="cue"></p>
+          <span>
+            Total concepts
+          </span>
 
         </div>
 
 
-        <div class="feedback-section">
+        <div class="progress-stage">
 
-          <strong>
-            Action
+          <strong id="progressRecognition">
+            0
           </strong>
 
-          <p id="action"></p>
+          <span>
+            Recognition
+          </span>
 
         </div>
 
 
-        <div class="feedback-section">
+        <div class="progress-stage">
 
-          <strong>
-            Reason
+          <strong id="progressExplanation">
+            0
           </strong>
 
-          <p id="reason"></p>
+          <span>
+            Explanation
+          </span>
 
         </div>
 
 
-        <div class="feedback-section">
+        <div class="progress-stage">
 
-          <strong>
-            Result Check
+          <strong id="progressApplication">
+            0
           </strong>
 
-          <p id="resultCheck"></p>
+          <span>
+            Scenario application
+          </span>
+
+        </div>
+
+
+        <div class="progress-stage">
+
+          <strong id="progressGameplay">
+            0
+          </strong>
+
+          <span>
+            Gameplay evidence
+          </span>
+
+        </div>
+
+
+        <div class="progress-stage">
+
+          <strong id="progressConsistency">
+            0
+          </strong>
+
+          <span>
+            Consistency evidence
+          </span>
 
         </div>
 
       </div>
 
+
+      <article
+        class="card"
+        style="margin-top: 16px;"
+      >
+
+        <div class="card-title-row">
+
+          <div>
+
+            <span class="eyebrow">
+              Spaced review
+            </span>
+
+            <h3>
+              Review Queue
+            </h3>
+
+          </div>
+
+          <span class="chip">
+
+            <span id="progressReviews">
+              0
+            </span>
+
+            due
+
+          </span>
+
+        </div>
+
+
+        <div
+          id="reviewQueue"
+          class="review-list"
+        ></div>
+
+      </article>
+
     </section>
 
 
-    <section class="card doctrine">
+    <!-- =====================================
+         DOCTRINE
+    ====================================== -->
 
-      <strong>
-        Decision Loop
-      </strong>
+    <section
+      class="screen"
+      data-screen="doctrine"
+      hidden
+    >
 
-      <br>
+      <div class="hero">
 
-      Observe →
-      Assess →
-      Prioritize →
-      Position →
-      Act →
-      Verify →
-      Reassess
+        <span class="eyebrow">
+          Universal Support Doctrine
+        </span>
+
+        <h1>
+          Training Map
+        </h1>
+
+        <p>
+          Enduring fundamentals come first.
+          Patch-specific implementation remains replaceable.
+        </p>
+
+      </div>
+
+
+      <article class="card">
+
+        <span class="eyebrow">
+          Four layers
+        </span>
+
+        <h3>
+          One system, different levels.
+        </h3>
+
+        <p class="small-muted">
+          Universal fundamentals → support principles →
+          textbook Rafaela execution → replaceable
+          patch-sensitive implementation.
+        </p>
+
+      </article>
+
+
+      <div id="doctrineDomains"></div>
+
+    </section>
+
+
+    <!-- =====================================
+         COMPLETE
+    ====================================== -->
+
+    <section
+      class="screen"
+      data-screen="complete"
+      hidden
+    >
+
+      <article class="card">
+
+        <div class="completion-icon">
+          ✓
+        </div>
+
+        <h1 class="complete-title">
+          Workout Complete
+        </h1>
+
+        <p class="complete-subtitle">
+          This records decision-practice evidence.
+          Real gameplay transfer still requires
+          gameplay evidence.
+        </p>
+
+
+        <div class="stat-grid">
+
+          <div class="stat">
+
+            <strong
+              id="sessionScore"
+              class="stat-value"
+            >
+              0
+            </strong>
+
+            <span class="stat-label">
+              Average decision score
+            </span>
+
+          </div>
+
+
+          <div class="stat">
+
+            <strong
+              id="sessionSuccessfulReps"
+              class="stat-value"
+              style="font-size: 23px;"
+            >
+              0 / 0
+            </strong>
+
+            <span class="stat-label">
+              Successful reps
+            </span>
+
+          </div>
+
+        </div>
+
+
+        <div class="feedback-item">
+
+          <strong>
+            Highest review priority from this session
+          </strong>
+
+          <p id="sessionWeakest">
+            Pending
+          </p>
+
+        </div>
+
+
+        <button
+          class="primary-button"
+          type="button"
+          data-nav="home"
+          style="margin-top: 17px;"
+        >
+          Return Home
+        </button>
+
+
+        <button
+          class="secondary-button"
+          type="button"
+          data-nav="progress"
+        >
+          View Progress
+        </button>
+
+      </article>
 
     </section>
 
   </main>
 
 
+  <!-- =====================================
+       BOTTOM NAV
+  ====================================== -->
+
+  <nav class="bottom-nav">
+
+    <button
+      class="nav-button active"
+      type="button"
+      data-nav="home"
+    >
+      Home
+    </button>
+
+
+    <button
+      class="nav-button"
+      type="button"
+      data-nav="progress"
+    >
+      Progress
+    </button>
+
+
+    <button
+      class="nav-button"
+      type="button"
+      data-nav="doctrine"
+    >
+      Doctrine
+    </button>
+
+  </nav>
+
+
+  <!-- =====================================
+       FATAL ERROR
+  ====================================== -->
+
+  <div
+    id="fatalError"
+    class="fatal-error"
+    hidden
+  >
+
+    <div class="fatal-box">
+
+      <h2>
+        Rafaela Gym could not start
+      </h2>
+
+      <p id="fatalErrorText">
+        The training system did not load.
+      </p>
+
+      <p class="small-muted">
+        Refresh the app once. If the problem remains,
+        we will inspect the module that failed.
+      </p>
+
+    </div>
+
+  </div>
+
+
+  <!-- =====================================
+       CORE MODULES
+
+       ORDER MATTERS.
+  ====================================== -->
+
+  <script src="./curriculum.js"></script>
+  <script src="./storage.js"></script>
+  <script src="./trainer.js"></script>
+  <script src="./scenarios.js"></script>
+  <script src="./app.js"></script>
+
+
+  <!-- PWA / OFFLINE REGISTRATION -->
+
   <script>
-
-    const reps = [
-
-      {
-        focus:
-          "Support the objective without becoming the easiest target.",
-
-        rafaela: [37, 76],
-        ally: [67, 65],
-        frontliner: [54, 47],
-        threat: [82, 42],
-        objective: [55, 31]
-      },
-
-
-      {
-        focus:
-          "A flank threat is near your backline. Find a protective support angle.",
-
-        rafaela: [61, 76],
-        ally: [36, 63],
-        frontliner: [48, 43],
-        threat: [22, 40],
-        objective: [52, 30]
-      },
-
-
-      {
-        focus:
-          "Your team moves forward. Stay connected without copying the frontline.",
-
-        rafaela: [43, 78],
-        ally: [69, 57],
-        frontliner: [58, 39],
-        threat: [76, 25],
-        objective: [51, 30]
-      },
-
-
-      {
-        focus:
-          "The threat moves closer. Reposition before becoming an easy second target.",
-
-        rafaela: [30, 76],
-        ally: [43, 67],
-        frontliner: [57, 48],
-        threat: [66, 58],
-        objective: [50, 29]
-      },
-
-
-      {
-        focus:
-          "Balance ally access, objective access, threat distance, and escape space.",
-
-        rafaela: [72, 78],
-        ally: [62, 62],
-        frontliner: [50, 44],
-        threat: [31, 49],
-        objective: [51, 28]
-      }
-
-    ];
-
-
-    let currentRep = 0;
-
-    let evaluated = false;
-
-
-    let rafaelaPosition = [
-      reps[0].rafaela[0],
-      reps[0].rafaela[1]
-    ];
-
-
-    const battlefield =
-      document.getElementById(
-        "battlefield"
-      );
-
-
-    const rafaela =
-      document.getElementById(
-        "rafaela"
-      );
-
-
-    const ally =
-      document.getElementById(
-        "ally"
-      );
-
-
-    const frontliner =
-      document.getElementById(
-        "frontliner"
-      );
-
-
-    const threat =
-      document.getElementById(
-        "threat"
-      );
-
-
-    const objective =
-      document.getElementById(
-        "objective"
-      );
-
-
-    const repText =
-      document.getElementById(
-        "rep"
-      );
-
-
-    const focusText =
-      document.getElementById(
-        "focus"
-      );
-
-
-    const scoreText =
-      document.getElementById(
-        "score"
-      );
-
-
-    const evaluateButton =
-      document.getElementById(
-        "evaluateButton"
-      );
-
-
-    const nextButton =
-      document.getElementById(
-        "nextButton"
-      );
-
-
-    const feedback =
-      document.getElementById(
-        "feedback"
-      );
-
-
-    const progressFill =
-      document.getElementById(
-        "progressFill"
-      );
-
-
-    function placeUnit(
-      element,
-      position
-    ) {
-
-      element.style.left =
-        position[0] + "%";
-
-
-      element.style.top =
-        position[1] + "%";
-
-    }
-
-
-    function distance(
-      a,
-      b
-    ) {
-
-      const dx =
-        a[0] - b[0];
-
-
-      const dy =
-        a[1] - b[1];
-
-
-      return Math.sqrt(
-        dx * dx +
-        dy * dy
-      );
-
-    }
-
-
-    function loadRep() {
-
-      const rep =
-        reps[currentRep];
-
-
-      evaluated =
-        false;
-
-
-      rafaelaPosition = [
-        rep.rafaela[0],
-        rep.rafaela[1]
-      ];
-
-
-      placeUnit(
-        rafaela,
-        rafaelaPosition
-      );
-
-
-      placeUnit(
-        ally,
-        rep.ally
-      );
-
-
-      placeUnit(
-        frontliner,
-        rep.frontliner
-      );
-
-
-      placeUnit(
-        threat,
-        rep.threat
-      );
-
-
-      placeUnit(
-        objective,
-        rep.objective
-      );
-
-
-      repText.textContent =
-        currentRep + 1;
-
-
-      focusText.textContent =
-        rep.focus;
-
-
-      scoreText.textContent =
-        "—";
-
-
-      feedback.classList.remove(
-        "show"
-      );
-
-
-      nextButton.disabled =
-        true;
-
-
-      evaluateButton.disabled =
-        false;
-
-
-      progressFill.style.width =
-        (
-          (currentRep + 1)
-          /
-          reps.length
-          *
-          100
-        )
-        + "%";
-
-    }
-
-
-    battlefield.addEventListener(
-      "pointerdown",
-
-      function(event) {
-
-        if (evaluated) {
-          return;
-        }
-
-
-        const rectangle =
-          battlefield.getBoundingClientRect();
-
-
-        let x =
-          (
-            (event.clientX - rectangle.left)
-            /
-            rectangle.width
-          )
-          *
-          100;
-
-
-        let y =
-          (
-            (event.clientY - rectangle.top)
-            /
-            rectangle.height
-          )
-          *
-          100;
-
-
-        x =
-          Math.max(
-            5,
-            Math.min(
-              95,
-              x
-            )
-          );
-
-
-        y =
-          Math.max(
-            5,
-            Math.min(
-              95,
-              y
-            )
-          );
-
-
-        rafaelaPosition =
-          [x, y];
-
-
-        placeUnit(
-          rafaela,
-          rafaelaPosition
-        );
-
-      }
-    );
-
-
-    evaluateButton.addEventListener(
-      "click",
-      evaluatePosition
-    );
-
-
-    nextButton.addEventListener(
-      "click",
-
-      function() {
-
-        currentRep++;
-
-
-        if (
-          currentRep >=
-          reps.length
-        ) {
-
-          currentRep =
-            0;
-
-        }
-
-
-        loadRep();
-
-      }
-    );
-
-
-    function evaluatePosition() {
-
-      if (evaluated) {
-        return;
-      }
-
-
-      evaluated =
-        true;
-
-
-      evaluateButton.disabled =
-        true;
-
-
-      nextButton.disabled =
-        false;
-
-
-      const rep =
-        reps[currentRep];
-
-
-      const allyDistance =
-        distance(
-          rafaelaPosition,
-          rep.ally
-        );
-
-
-      const threatDistance =
-        distance(
-          rafaelaPosition,
-          rep.threat
-        );
-
-
-      const objectiveDistance =
-        distance(
-          rafaelaPosition,
-          rep.objective
-        );
-
-
-      const frontDistance =
-        distance(
-          rafaelaPosition,
-          rep.frontliner
-        );
-
-
-      let score =
-        100;
-
-
-      if (
-        allyDistance > 36
-      ) {
-
-        score -=
-          Math.min(
-            35,
-            (allyDistance - 36)
-            *
-            1.4
-          );
-
-      }
-
-
-      if (
-        allyDistance < 9
-      ) {
-
-        score -=
-          8;
-
-      }
-
-
-      if (
-        threatDistance < 22
-      ) {
-
-        score -=
-          Math.min(
-            40,
-            (22 - threatDistance)
-            *
-            2.4
-          );
-
-      }
-
-
-      if (
-        objectiveDistance > 48
-      ) {
-
-        score -=
-          Math.min(
-            25,
-            objectiveDistance
-            -
-            48
-          );
-
-      }
-
-
-      if (
-        frontDistance < 8
-      ) {
-
-        score -=
-          10;
-
-      }
-
-
-      score =
-        Math.round(
-          Math.max(
-            0,
-            Math.min(
-              100,
-              score
-            )
-          )
-        );
-
-
-      scoreText.textContent =
-        score;
-
-
-      let title;
-
-      let action;
-
-      let reason;
-
-      let check;
-
-
-      if (
-        score >= 85
-      ) {
-
-        title =
-          "Strong Position";
-
-
-        action =
-          "You maintained useful ally access while preserving separation from the main threat.";
-
-
-        reason =
-          "Rafaela creates value by participating without becoming an unnecessary first target.";
-
-
-        check =
-          "If an ally, threat, objective, or escape route changes, reposition again.";
-
-      }
-
-
-      else if (
-        threatDistance < 22
-      ) {
-
-        title =
-          "Too Exposed";
-
-
-        action =
-          "Create more separation from the threat while staying connected to your team.";
-
-
-        reason =
-          "Support access is not useful if Rafaela can be removed before contributing.";
-
-
-        check =
-          "Can the threat reach you easily? Can you move safer without disconnecting?";
-
-      }
-
-
-      else if (
-        allyDistance > 36
-      ) {
-
-        title =
-          "Too Disconnected";
-
-
-        action =
-          "Move closer to the relevant ally group while maintaining a safe angle.";
-
-
-        reason =
-          "Excessive safety reduces participation. Rafaela must remain close enough to influence the play.";
-
-
-        check =
-          "Can you realistically support the ally if the fight starts now?";
-
-      }
-
-
-      else {
-
-        title =
-          "Usable — Improve the Angle";
-
-
-        action =
-          "Make a smaller adjustment to improve participation, safety, or escape space.";
-
-
-        reason =
-          "Good positioning is a balance, not one perfect fixed location.";
-
-
-        check =
-          "Can you help immediately while still responding safely if the situation changes?";
-
-      }
-
-
-      document.getElementById(
-        "resultTitle"
-      ).textContent =
-        title
-        +
-        " · "
-        +
-        score
-        +
-        "/100";
-
-
-      document.getElementById(
-        "cue"
-      ).textContent =
-        rep.focus;
-
-
-      document.getElementById(
-        "action"
-      ).textContent =
-        action;
-
-
-      document.getElementById(
-        "reason"
-      ).textContent =
-        reason;
-
-
-      document.getElementById(
-        "resultCheck"
-      ).textContent =
-        check;
-
-
-      feedback.classList.add(
-        "show"
-      );
-
-    }
-
-
-    loadRep();
-
-
-    /*
-      Register the Rafaela Gym service worker.
-
-      This lets the browser cache the app so it
-      can continue working after it has been loaded.
-    */
-
-    if (
-      "serviceWorker" in navigator
-    ) {
-
+    if ("serviceWorker" in navigator) {
       window.addEventListener(
         "load",
-
         function() {
-
           navigator.serviceWorker
-            .register(
-              "./service-worker.js"
-            )
-            .then(
-              function(registration) {
-
-                console.log(
-                  "Rafaela Gym service worker registered:",
-                  registration.scope
-                );
-
-              }
-            )
-            .catch(
-              function(error) {
-
-                console.error(
-                  "Service worker registration failed:",
-                  error
-                );
-
-              }
-            );
-
+            .register("./service-worker.js")
+            .catch(function(error) {
+              console.error(
+                "Rafaela Gym service worker registration failed:",
+                error
+              );
+            });
         }
       );
-
     }
-
   </script>
 
 </body>
