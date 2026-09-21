@@ -1,187 +1,60 @@
 /*
-  RAFAELA GYM
-  Scenario Engine — V2
+============================================================
+RAFAELA GYM
+POSITIONING SCENARIO ENGINE V3
+============================================================
 
-  PURPOSE
+Purpose:
+Train positioning through simulated decision practice.
 
-  Convert Universal Support Doctrine concepts into
-  practical decision-training situations.
+This engine does NOT claim that its internal map percentages,
+distances, thresholds, or scores are real MLBB measurements.
 
-  Important:
+They are abstract training-space values used to teach stable
+positioning principles:
 
-  - These scenarios are DECISION PRACTICE.
-  - They are NOT proof of real mechanical skill.
-  - Coordinates use normalized training-space units
-    from 0 to 100.
-  - These values are NOT MLBB ranges, distances,
-    cooldowns, or hidden game statistics.
-  - Patch-sensitive Rafaela mechanics do not belong here.
+Observe
+→ Assess
+→ Prioritize
+→ Position
+→ Act
+→ Verify
+→ Reassess
 
-  The engine trains:
-  - observation
-  - uncertainty
-  - prioritization
-  - positioning
-  - threat management
-  - ally access
-  - objective participation
-  - escape space
-  - tradeoffs
+The evaluator considers:
+
+1. Participation
+2. Ally access
+3. Threat safety
+4. Objective relevance
+5. Escape space
+6. Uncertainty safety
+7. Frontline relationship
+8. Direct threat paths
+9. Crowding / actor overlap
+10. Scenario priorities
+
+There is deliberately no universal rule such as:
+- always stand behind the tank
+- always stand beside the marksman
+- always stay far away
+- always hug the objective
+
+The best-supported zone changes with the situation.
+============================================================
 */
 
 
 window.RafaelaScenarios = {
 
-  version:
-    "2.0.0",
-
-
   /*
-    Scenario difficulty levels.
-
-    Difficulty increases through:
-    - more competing priorities
-    - more uncertainty
-    - more relevant actors
-    - tighter tradeoffs
-
-    NOT obscure trivia.
-  */
-
-  difficultyLevels: {
-
-    1: {
-      name:
-        "Foundation",
-
-      description:
-        "One dominant cue with limited competing information."
-    },
-
-
-    2: {
-      name:
-        "Developing",
-
-      description:
-        "Two relevant priorities must be balanced."
-    },
-
-
-    3: {
-      name:
-        "Applied",
-
-      description:
-        "Multiple threats, allies, or objectives compete for attention."
-    },
-
-
-    4: {
-      name:
-        "Advanced",
-
-      description:
-        "Uncertainty and tradeoffs make the best action less obvious."
-    },
-
-
-    5: {
-      name:
-        "Mixed Macro",
-
-      description:
-        "Several systems interact and priorities can change quickly."
-    }
-
-  },
-
-
-  /*
-    Generic actor types.
-
-    These describe tactical function,
-    not specific MLBB heroes.
-  */
-
-  actorTypes: {
-
-    priorityAlly: {
-      label:
-        "Priority Ally",
-
-      short:
-        "ALLY"
-    },
-
-
-    frontline: {
-      label:
-        "Frontline Ally",
-
-      short:
-        "FRONT"
-    },
-
-
-    damageAlly: {
-      label:
-        "Damage Ally",
-
-      short:
-        "DMG"
-    },
-
-
-    enemyThreat: {
-      label:
-        "Primary Threat",
-
-      short:
-        "THREAT"
-    },
-
-
-    secondaryThreat: {
-      label:
-        "Secondary Threat",
-
-      short:
-        "ENEMY"
-    },
-
-
-    missingThreat: {
-      label:
-        "Missing Threat",
-
-      short:
-        "?"
-    },
-
-
-    objective: {
-      label:
-        "Objective",
-
-      short:
-        "OBJ"
-    }
-
-  },
-
-
-  /*
-    Helper:
-    constrain a normalized coordinate.
+  ==========================================================
+  BASIC UTILITIES
+  ==========================================================
   */
 
   clamp:
-    function(
-      value,
-      min,
-      max
-    ) {
+    function(value, min, max) {
 
       return Math.max(
         min,
@@ -194,27 +67,28 @@ window.RafaelaScenarios = {
     },
 
 
-  /*
-    Helper:
-    distance in normalized training-space units.
-
-    Again:
-    this is NOT an MLBB distance measurement.
-  */
-
   distance:
-    function(
-      a,
-      b
-    ) {
+    function(a, b) {
+
+      if (
+        !a
+        ||
+        !b
+      ) {
+
+        return 999;
+
+      }
 
       const dx =
-        a.x - b.x;
-
+        Number(a.x)
+        -
+        Number(b.x);
 
       const dy =
-        a.y - b.y;
-
+        Number(a.y)
+        -
+        Number(b.y);
 
       return Math.sqrt(
         dx * dx
@@ -225,1213 +99,242 @@ window.RafaelaScenarios = {
     },
 
 
-  /*
-    Deterministic pseudo-random generator.
+  roundScore:
+    function(value) {
 
-    A seed lets us recreate a scenario later.
-  */
-
-  createRandom:
-    function(
-      seed
-    ) {
-
-      let value =
-        Number(seed)
-        ||
-        Date.now();
-
-
-      return function() {
-
-        value |= 0;
-
-        value =
-          value + 0x6D2B79F5
-          | 0;
-
-
-        let t =
-          Math.imul(
-            value
-            ^
-            value >>> 15,
-            1
-            |
-            value
-          );
-
-
-        t =
-          t
-          +
-          Math.imul(
-            t
-            ^
-            t >>> 7,
-            61
-            |
-            t
-          )
-          ^
-          t;
-
-
-        return (
-          (
-            t
-            ^
-            t >>> 14
-          )
-          >>>
-          0
-        )
-        /
-        4294967296;
-
-      };
-
-    },
-
-
-  /*
-    Helper:
-    choose one item.
-  */
-
-  pick:
-    function(
-      random,
-      items
-    ) {
-
-      const index =
-        Math.floor(
-          random()
-          *
-          items.length
-        );
-
-
-      return items[
-        index
-      ];
-
-    },
-
-
-  /*
-    Helper:
-    choose a number between min and max.
-  */
-
-  between:
-    function(
-      random,
-      min,
-      max
-    ) {
-
-      return (
-        min
-        +
-        random()
-        *
-        (
-          max
-          -
-          min
+      return Math.round(
+        this.clamp(
+          value,
+          0,
+          100
         )
       );
 
     },
 
 
-  /*
-    Helper:
-    create actor object.
-  */
+  average:
+    function(values) {
 
-  actor:
-    function(
-      id,
-      type,
-      x,
-      y,
-      options
-    ) {
-
-      const config =
-        options
+      if (
+        !values
         ||
-        {};
+        values.length === 0
+      ) {
 
+        return 0;
 
-      return {
+      }
 
-        id:
-          id,
+      return (
+        values.reduce(
+          function(total, value) {
 
-        type:
-          type,
+            return total + value;
 
-        label:
-          config.label
-          ||
-          this.actorTypes[
-            type
-          ].label,
-
-        short:
-          config.short
-          ||
-          this.actorTypes[
-            type
-          ].short,
-
-        x:
-          this.clamp(
-            x,
-            5,
-            95
-          ),
-
-        y:
-          this.clamp(
-            y,
-            5,
-            95
-          ),
-
-        visible:
-          config.visible !==
-          false,
-
-        relevant:
-          config.relevant !==
-          false,
-
-        notes:
-          config.notes
-          ||
-          ""
-
-      };
+          },
+          0
+        )
+        /
+        values.length
+      );
 
     },
 
 
   /*
-    ------------------------------------------------
-    SCENARIO BUILDERS
-    ------------------------------------------------
+  ==========================================================
+  GENERIC SCORING CURVES
+
+  These are SIMULATION values.
+
+  They are NOT MLBB unit ranges.
+  ==========================================================
   */
 
 
-  buildParticipationScenario:
+  rangeScore:
     function(
-      random,
-      difficulty
+      value,
+      preferredMin,
+      preferredMax,
+      falloff
     ) {
 
-      const side =
-        random() > 0.5
-        ?
-        1
-        :
-        -1;
+      if (
+        value >= preferredMin
+        &&
+        value <= preferredMax
+      ) {
 
+        return 100;
 
-      const objective =
-        this.actor(
-          "objective",
-          "objective",
-          50,
-          24
-        );
-
-
-      const front =
-        this.actor(
-          "frontline",
-          "frontline",
-          50
-          +
-          side
-          *
-          this.between(
-            random,
-            2,
-            9
-          ),
-          43
-        );
-
-
-      const ally =
-        this.actor(
-          "priority_ally",
-          "priorityAlly",
-          50
-          -
-          side
-          *
-          this.between(
-            random,
-            12,
-            22
-          ),
-          60
-        );
-
-
-      const threat =
-        this.actor(
-          "primary_threat",
-          "enemyThreat",
-          50
-          +
-          side
-          *
-          this.between(
-            random,
-            24,
-            34
-          ),
-          43
-        );
-
-
-      const actors = [
-        objective,
-        front,
-        ally,
-        threat
-      ];
+      }
 
 
       if (
-        difficulty >= 3
+        value < preferredMin
       ) {
 
-        actors.push(
-          this.actor(
-            "secondary_enemy",
-            "secondaryThreat",
-            50
-            -
-            side
-            *
-            this.between(
-              random,
-              28,
-              38
-            ),
-            31
+        const difference =
+          preferredMin
+          -
+          value;
+
+        return this.clamp(
+          100
+          -
+          (
+            difference
+            /
+            falloff
           )
+          *
+          100,
+          0,
+          100
         );
 
       }
 
 
-      return {
+      const difference =
+        value
+        -
+        preferredMax;
 
-        conceptId:
-          "positioning_01",
-
-        title:
-          "Useful Participation",
-
-        instruction:
-          "Position Rafaela so she can influence the play without becoming unnecessarily exposed.",
-
-        facts: [
-          "An objective is active.",
-          "A frontline ally is positioned ahead.",
-          "A priority ally needs support access.",
-          "A visible enemy threat can pressure the fight."
-        ],
-
-        inferences: [
-          "Standing too far away may remove Rafaela from the play.",
-          "Standing directly with the frontline may create unnecessary exposure."
-        ],
-
-        unknowns:
-          difficulty >= 3
-          ?
-          [
-            "The secondary enemy's next action is unknown."
-          ]
-          :
-          [
-            "The enemy threat's exact next action is unknown."
-          ],
-
-        actors:
-          actors,
-
-        startPosition: {
-          x:
-            50
-            -
-            side
-            *
-            22,
-
-          y:
-            78
-        },
-
-        evaluation:
-          "positioning",
-
-        focusWeights: {
-
-          participation:
-            1.0,
-
-          threatSafety:
-            1.0,
-
-          allyAccess:
-            1.0,
-
-          objectiveAccess:
-            0.8,
-
-          frontlineSeparation:
-            0.7,
-
-          escapeSpace:
-            0.7
-
-        }
-
-      };
+      return this.clamp(
+        100
+        -
+        (
+          difference
+          /
+          falloff
+        )
+        *
+        100,
+        0,
+        100
+      );
 
     },
 
 
-  buildThreatReachScenario:
+  fartherIsSafer:
     function(
-      random,
-      difficulty
+      value,
+      dangerDistance,
+      comfortableDistance
     ) {
 
-      const side =
-        random() > 0.5
-        ?
-        1
-        :
-        -1;
-
-
-      const ally =
-        this.actor(
-          "priority_ally",
-          "priorityAlly",
-          50
-          -
-          side
-          *
-          15,
-          56
-        );
-
-
-      const front =
-        this.actor(
-          "frontline",
-          "frontline",
-          50
-          +
-          side
-          *
-          4,
-          43
-        );
-
-
-      const threat =
-        this.actor(
-          "primary_threat",
-          "enemyThreat",
-          50
-          +
-          side
-          *
-          29,
-          45
-        );
-
-
-      const actors = [
-        ally,
-        front,
-        threat
-      ];
-
-
       if (
-        difficulty >= 3
+        value <= dangerDistance
       ) {
 
-        actors.push(
-          this.actor(
-            "objective",
-            "objective",
-            50,
-            24
-          )
-        );
+        return 0;
+
+      }
+
+      if (
+        value >= comfortableDistance
+      ) {
+
+        return 100;
 
       }
 
 
-      return {
-
-        conceptId:
-          "threats_02",
-
-        title:
-          "Threat Reach",
-
-        instruction:
-          "Position for what the threat could plausibly do next, not only where it currently stands.",
-
-        facts: [
-          "The primary threat is visible.",
-          "The priority ally is within the current fight area.",
-          "The frontline ally is already ahead of Rafaela."
-        ],
-
-        inferences: [
-          "The enemy may close distance or control an exposed support angle.",
-          "Rafaela can remain useful without occupying the frontline's danger zone."
-        ],
-
-        unknowns: [
-          "The enemy threat's exact next action is unknown."
-        ],
-
-        actors:
-          actors,
-
-        startPosition: {
-          x:
-            50
-            -
-            side
-            *
-            6,
-
-          y:
-            71
-        },
-
-        evaluation:
-          "positioning",
-
-        focusWeights: {
-
-          participation:
-            0.9,
-
-          threatSafety:
-            1.3,
-
-          allyAccess:
-            1.0,
-
-          objectiveAccess:
-            difficulty >= 3
-            ?
-            0.6
-            :
-            0,
-
-          frontlineSeparation:
-            0.8,
-
-          escapeSpace:
-            0.8
-
-        }
-
-      };
+      return (
+        (
+          value
+          -
+          dangerDistance
+        )
+        /
+        (
+          comfortableDistance
+          -
+          dangerDistance
+        )
+      )
+      *
+      100;
 
     },
 
 
-  buildMissingThreatScenario:
+  closerIsBetter:
     function(
-      random,
-      difficulty
+      value,
+      idealDistance,
+      failureDistance
     ) {
 
-      const side =
-        random() > 0.5
-        ?
-        1
-        :
-        -1;
-
-
-      const ally =
-        this.actor(
-          "priority_ally",
-          "priorityAlly",
-          50
-          -
-          side
-          *
-          10,
-          57
-        );
-
-
-      const visibleThreat =
-        this.actor(
-          "visible_threat",
-          "secondaryThreat",
-          50
-          +
-          side
-          *
-          29,
-          40
-        );
-
-
-      const missingThreat =
-        this.actor(
-          "missing_threat",
-          "missingThreat",
-          50
-          -
-          side
-          *
-          38,
-          39,
-          {
-            visible:
-              false,
-
-            notes:
-              "Exact location unknown."
-          }
-        );
-
-
-      const actors = [
-        ally,
-        visibleThreat,
-        missingThreat
-      ];
-
-
       if (
-        difficulty >= 2
+        value <= idealDistance
       ) {
 
-        actors.push(
-          this.actor(
-            "objective",
-            "objective",
-            50,
-            25
-          )
-        );
+        return 100;
+
+      }
+
+      if (
+        value >= failureDistance
+      ) {
+
+        return 0;
 
       }
 
 
-      return {
-
-        conceptId:
-          "information_02",
-
-        title:
-          "Missing Threat",
-
-        instruction:
-          "Stay useful while denying the most obvious collapse angle from the unseen threat.",
-
-        facts: [
-          "One enemy threat is visible.",
-          "A dangerous enemy is currently missing.",
-          "The priority ally remains in the active area."
-        ],
-
-        inferences: [
-          "The missing threat may approach through an open flank.",
-          "Total retreat would also reduce Rafaela's participation."
-        ],
-
-        unknowns: [
-          "The missing enemy's exact location is unknown.",
-          "The missing enemy's exact next action is unknown."
-        ],
-
-        actors:
-          actors,
-
-        hiddenThreatSide:
-          side
-          *
-          -1,
-
-        startPosition: {
-          x:
-            50,
-
-          y:
-            75
-        },
-
-        evaluation:
-          "uncertainty_positioning",
-
-        focusWeights: {
-
-          participation:
-            1.0,
-
-          threatSafety:
-            0.9,
-
-          allyAccess:
-            1.0,
-
-          objectiveAccess:
-            difficulty >= 2
-            ?
-            0.5
-            :
-            0,
-
-          frontlineSeparation:
-            0.3,
-
-          escapeSpace:
-            1.0,
-
-          uncertaintySafety:
-            1.3
-
-        }
-
-      };
-
-    },
-
-
-  buildFrontlineScenario:
-    function(
-      random,
-      difficulty
-    ) {
-
-      const side =
-        random() > 0.5
-        ?
+      return (
         1
-        :
-        -1;
-
-
-      const front =
-        this.actor(
-          "frontline",
-          "frontline",
-          50
-          +
-          side
-          *
-          4,
-          38
-        );
-
-
-      const ally =
-        this.actor(
-          "priority_ally",
-          "priorityAlly",
-          50
-          -
-          side
-          *
-          16,
-          57
-        );
-
-
-      const threat =
-        this.actor(
-          "primary_threat",
-          "enemyThreat",
-          50
-          +
-          side
-          *
-          27,
-          35
-        );
-
-
-      return {
-
-        conceptId:
-          "positioning_02",
-
-        title:
-          "Support Without Copying Frontline",
-
-        instruction:
-          "Support the advancing ally without occupying the same danger zone.",
-
-        facts: [
-          "The frontline ally is advancing.",
-          "The priority ally remains behind the frontline.",
-          "A visible threat can pressure the forward area."
-        ],
-
-        inferences: [
-          "The frontline can tolerate exposure that Rafaela may not want to copy.",
-          "Rafaela can support from a different angle or depth."
-        ],
-
-        unknowns: [
-          "How far the frontline will continue is unknown."
-        ],
-
-        actors: [
-          front,
-          ally,
-          threat
-        ],
-
-        startPosition: {
-          x:
-            front.x
+        -
+        (
+          (
+            value
             -
-            side
-            *
-            4,
-
-          y:
-            48
-        },
-
-        evaluation:
-          "positioning",
-
-        focusWeights: {
-
-          participation:
-            0.9,
-
-          threatSafety:
-            1.0,
-
-          allyAccess:
-            0.9,
-
-          objectiveAccess:
-            0,
-
-          frontlineSeparation:
-            1.4,
-
-          escapeSpace:
-            0.7
-
-        }
-
-      };
-
-    },
-
-
-  buildObjectivePreparationScenario:
-    function(
-      random,
-      difficulty
-    ) {
-
-      const side =
-        random() > 0.5
-        ?
-        1
-        :
-        -1;
-
-
-      const objective =
-        this.actor(
-          "objective",
-          "objective",
-          50,
-          23
-        );
-
-
-      const ally =
-        this.actor(
-          "priority_ally",
-          "priorityAlly",
-          50
-          -
-          side
-          *
-          16,
-          53
-        );
-
-
-      const front =
-        this.actor(
-          "frontline",
-          "frontline",
-          50
-          +
-          side
-          *
-          5,
-          42
-        );
-
-
-      const threat =
-        this.actor(
-          "primary_threat",
-          "enemyThreat",
-          50
-          +
-          side
-          *
-          31,
-          39
-        );
-
-
-      const actors = [
-        objective,
-        ally,
-        front,
-        threat
-      ];
-
-
-      if (
-        difficulty >= 4
-      ) {
-
-        actors.push(
-          this.actor(
-            "missing_threat",
-            "missingThreat",
-            50
-            -
-            side
-            *
-            38,
-            34,
-            {
-              visible:
-                false
-            }
+            idealDistance
           )
-        );
-
-      }
-
-
-      return {
-
-        conceptId:
-          "objectives_01",
-
-        title:
-          "Objective Preparation",
-
-        instruction:
-          "Take a position that supports the coming objective before direct contest begins.",
-
-        facts: [
-          "The objective area is becoming important.",
-          "Allies are approaching the objective.",
-          "A visible enemy threat can contest the area."
-        ],
-
-        inferences: [
-          "Late positioning will reduce available options.",
-          "Preparation should preserve ally access and safe routes."
-        ],
-
-        unknowns:
-          difficulty >= 4
-          ?
-          [
-            "A relevant enemy is missing.",
-            "The enemy team's exact contest route is unknown."
-          ]
-          :
-          [
-            "The enemy team's exact contest route is unknown."
-          ],
-
-        actors:
-          actors,
-
-        startPosition: {
-          x:
-            50
+          /
+          (
+            failureDistance
             -
-            side
-            *
-            12,
-
-          y:
-            78
-        },
-
-        evaluation:
-          difficulty >= 4
-          ?
-          "uncertainty_positioning"
-          :
-          "positioning",
-
-        focusWeights: {
-
-          participation:
-            0.9,
-
-          threatSafety:
-            0.9,
-
-          allyAccess:
-            0.9,
-
-          objectiveAccess:
-            1.4,
-
-          frontlineSeparation:
-            0.5,
-
-          escapeSpace:
-            0.9,
-
-          uncertaintySafety:
-            difficulty >= 4
-            ?
-            0.8
-            :
-            0
-
-        }
-
-      };
-
-    },
-
-
-  /*
-    ------------------------------------------------
-    SCENARIO SELECTION
-    ------------------------------------------------
-  */
-
-
-  buildersByConcept: {
-
-    positioning_01:
-      "buildParticipationScenario",
-
-    positioning_02:
-      "buildFrontlineScenario",
-
-    threats_02:
-      "buildThreatReachScenario",
-
-    information_02:
-      "buildMissingThreatScenario",
-
-    objectives_01:
-      "buildObjectivePreparationScenario"
-
-  },
-
-
-  /*
-    Concepts that do not yet have a dedicated
-    visual builder can still use a related
-    positioning scenario temporarily.
-
-    This prevents the app from breaking while
-    we progressively add more specialized gyms.
-  */
-
-  fallbackBuilders: {
-
-    team_goal_01:
-      "buildParticipationScenario",
-
-    team_goal_02:
-      "buildObjectivePreparationScenario",
-
-    information_01:
-      "buildMissingThreatScenario",
-
-    positioning_03:
-      "buildParticipationScenario",
-
-    threats_01:
-      "buildThreatReachScenario",
-
-    support_01:
-      "buildParticipationScenario",
-
-    support_02:
-      "buildThreatReachScenario",
-
-    tempo_01:
-      "buildObjectivePreparationScenario",
-
-    tempo_02:
-      "buildObjectivePreparationScenario",
-
-    teamfights_01:
-      "buildThreatReachScenario",
-
-    self_01:
-      "buildParticipationScenario"
-
-  },
-
-
-  /*
-    Generate one scenario.
-  */
-
-  generate:
-    function(
-      conceptId,
-      options
-    ) {
-
-      const config =
-        options
-        ||
-        {};
-
-
-      const difficulty =
-        this.clamp(
-          Number(
-            config.difficulty
+            idealDistance
           )
-          ||
-          1,
-          1,
-          5
-        );
-
-
-      const seed =
-        config.seed
-        ||
-        Date.now();
-
-
-      const random =
-        this.createRandom(
-          seed
-        );
-
-
-      let builderName =
-        this.buildersByConcept[
-          conceptId
-        ]
-        ||
-        this.fallbackBuilders[
-          conceptId
-        ]
-        ||
-        "buildParticipationScenario";
-
-
-      const builder =
-        this[
-          builderName
-        ];
-
-
-      const scenario =
-        builder.call(
-          this,
-          random,
-          difficulty
-        );
-
-
-      scenario.id =
-        "scenario_"
-        +
-        seed;
-
-
-      scenario.seed =
-        seed;
-
-
-      scenario.requestedConceptId =
-        conceptId;
-
-
-      scenario.difficulty =
-        difficulty;
-
-
-      scenario.difficultyName =
-        this.difficultyLevels[
-          difficulty
-        ].name;
-
-
-      scenario.practiceType =
-        "decision_practice";
-
-
-      scenario.evidenceLimit =
-        "This scenario measures decision practice only. It does not prove real gameplay mechanics or consistency.";
-
-
-      return scenario;
+        )
+      )
+      *
+      100;
 
     },
 
 
   /*
-    ------------------------------------------------
-    EVALUATION HELPERS
-    ------------------------------------------------
+  ==========================================================
+  ACTOR HELPERS
+  ==========================================================
   */
 
 
-  getActor:
+  actorByType:
     function(
       scenario,
-      id
+      type
     ) {
 
-      return scenario.actors.find(
+      return (
+        scenario.actors
+        ||
+        []
+      )
+      .find(
         function(actor) {
 
-          return actor.id === id;
+          return (
+            actor.type ===
+            type
+          );
 
         }
       )
@@ -1441,16 +344,79 @@ window.RafaelaScenarios = {
     },
 
 
-  getActorsByType:
+  actorsByType:
     function(
       scenario,
       type
     ) {
 
-      return scenario.actors.filter(
+      return (
+        scenario.actors
+        ||
+        []
+      )
+      .filter(
         function(actor) {
 
-          return actor.type === type;
+          return (
+            actor.type ===
+            type
+          );
+
+        }
+      );
+
+    },
+
+
+  visibleThreats:
+    function(scenario) {
+
+      return (
+        scenario.actors
+        ||
+        []
+      )
+      .filter(
+        function(actor) {
+
+          return (
+            (
+              actor.type ===
+                "enemyThreat"
+              ||
+              actor.type ===
+                "secondaryThreat"
+            )
+            &&
+            actor.visible !==
+              false
+          );
+
+        }
+      );
+
+    },
+
+
+  uncertainThreats:
+    function(scenario) {
+
+      return (
+        scenario.actors
+        ||
+        []
+      )
+      .filter(
+        function(actor) {
+
+          return (
+            actor.visible ===
+              false
+            ||
+            actor.type ===
+              "uncertainThreat"
+          );
 
         }
       );
@@ -1459,109 +425,1893 @@ window.RafaelaScenarios = {
 
 
   /*
-    Scores are abstract training dimensions.
-
-    They do NOT represent MLBB statistics.
+  ==========================================================
+  GEOMETRY
+  ==========================================================
   */
 
-  scoreCloseness:
+
+  pointToSegmentDistance:
     function(
-      distance,
-      ideal,
-      tolerance
+      point,
+      segmentStart,
+      segmentEnd
     ) {
 
-      const difference =
-        Math.abs(
-          distance
-          -
-          ideal
-        );
+      const x =
+        Number(point.x);
+
+      const y =
+        Number(point.y);
+
+      const x1 =
+        Number(segmentStart.x);
+
+      const y1 =
+        Number(segmentStart.y);
+
+      const x2 =
+        Number(segmentEnd.x);
+
+      const y2 =
+        Number(segmentEnd.y);
 
 
-      const normalized =
-        1
+      const dx =
+        x2
         -
-        difference
-        /
-        tolerance;
+        x1;
 
+      const dy =
+        y2
+        -
+        y1;
 
-      return this.clamp(
-        normalized
-        *
-        100,
-        0,
-        100
-      );
-
-    },
-
-
-  scoreMinimumDistance:
-    function(
-      distance,
-      desired
-    ) {
-
-      return this.clamp(
-        distance
-        /
-        desired
-        *
-        100,
-        0,
-        100
-      );
-
-    },
-
-
-  scoreMaximumDistance:
-    function(
-      distance,
-      desired
-    ) {
 
       if (
-        distance <= desired
+        dx === 0
+        &&
+        dy === 0
       ) {
 
-        return 100;
+        return this.distance(
+          point,
+          segmentStart
+        );
 
       }
 
 
-      return this.clamp(
-        100
-        -
-        (
-          distance
-          -
-          desired
-        )
-        *
-        4,
-        0,
-        100
+      const t =
+        this.clamp(
+          (
+            (
+              x
+              -
+              x1
+            )
+            *
+            dx
+            +
+            (
+              y
+              -
+              y1
+            )
+            *
+            dy
+          )
+          /
+          (
+            dx * dx
+            +
+            dy * dy
+          ),
+          0,
+          1
+        );
+
+
+      const projection = {
+
+        x:
+          x1
+          +
+          t
+          *
+          dx,
+
+        y:
+          y1
+          +
+          t
+          *
+          dy
+
+      };
+
+
+      return this.distance(
+        point,
+        projection
       );
 
     },
 
 
   /*
-    Escape-space proxy.
+  Returns how much usable map remains if Rafaela
+  retreats directly away from the main visible threat.
 
-    Rewards avoiding extreme edges while
-    retaining room to move.
-
-    This is an abstract training heuristic.
+  This measures simulated escape room,
+  not an MLBB movement distance.
   */
+
+  escapeRoomFromThreat:
+    function(
+      position,
+      threat
+    ) {
+
+      if (
+        !threat
+      ) {
+
+        return 75;
+
+      }
+
+
+      let dx =
+        position.x
+        -
+        threat.x;
+
+      let dy =
+        position.y
+        -
+        threat.y;
+
+
+      const magnitude =
+        Math.sqrt(
+          dx * dx
+          +
+          dy * dy
+        );
+
+
+      if (
+        magnitude < 0.001
+      ) {
+
+        return 0;
+
+      }
+
+
+      dx /=
+        magnitude;
+
+      dy /=
+        magnitude;
+
+
+      const distances =
+        [];
+
+
+      if (
+        dx > 0
+      ) {
+
+        distances.push(
+          (
+            97
+            -
+            position.x
+          )
+          /
+          dx
+        );
+
+      }
+
+      else if (
+        dx < 0
+      ) {
+
+        distances.push(
+          (
+            3
+            -
+            position.x
+          )
+          /
+          dx
+        );
+
+      }
+
+
+      if (
+        dy > 0
+      ) {
+
+        distances.push(
+          (
+            97
+            -
+            position.y
+          )
+          /
+          dy
+        );
+
+      }
+
+      else if (
+        dy < 0
+      ) {
+
+        distances.push(
+          (
+            3
+            -
+            position.y
+          )
+          /
+          dy
+        );
+
+      }
+
+
+      const positive =
+        distances.filter(
+          function(value) {
+
+            return (
+              Number.isFinite(value)
+              &&
+              value >= 0
+            );
+
+          }
+        );
+
+
+      if (
+        positive.length ===
+        0
+      ) {
+
+        return 0;
+
+      }
+
+
+      return Math.min(
+        ...positive
+      );
+
+    },
+
+
+  /*
+  ==========================================================
+  CURRICULUM CONNECTION
+  ==========================================================
+  */
+
+
+  findPositioningConcept:
+    function() {
+
+      try {
+
+        if (
+          !window.RafaelaCurriculum
+          ||
+          !Array.isArray(
+            window.RafaelaCurriculum
+              .domains
+          )
+        ) {
+
+          return null;
+
+        }
+
+
+        for (
+          const domain
+          of
+          window.RafaelaCurriculum
+            .domains
+        ) {
+
+          for (
+            const concept
+            of
+            (
+              domain.concepts
+              ||
+              []
+            )
+        ) {
+
+            const name =
+              String(
+                concept.name
+                ||
+                ""
+              )
+              .toLowerCase();
+
+
+            if (
+              name.includes(
+                "position"
+              )
+            ) {
+
+              return {
+
+                conceptId:
+                  concept.id,
+
+                conceptName:
+                  concept.name,
+
+                domainName:
+                  domain.name
+
+              };
+
+            }
+
+          }
+
+        }
+
+      }
+
+      catch(error) {
+
+        console.warn(
+          "Could not resolve positioning concept.",
+          error
+        );
+
+      }
+
+
+      return null;
+
+    },
+
+
+  /*
+  ==========================================================
+  SCENARIO LIBRARY
+  ==========================================================
+  */
+
+
+  scenarioTemplates: [
+
+    /*
+    ----------------------------------------------------------
+    1. OBJECTIVE SETUP + MISSING ENEMY
+    ----------------------------------------------------------
+    */
+
+    {
+
+      id:
+        "objective_uncertainty",
+
+      title:
+        "Objective Setup — Missing Enemy",
+
+      instruction:
+        "Position Rafaela so she can support the objective and priority ally without becoming an easy target or overcommitting toward the unknown threat.",
+
+      difficultyName:
+        "Foundational",
+
+      weights: {
+
+        participation:
+          0.18,
+
+        allyAccess:
+          0.20,
+
+        threatSafety:
+          0.20,
+
+        objectiveAccess:
+          0.14,
+
+        escapeSpace:
+          0.12,
+
+        uncertaintySafety:
+          0.16
+
+      },
+
+      startPosition: {
+
+        x:
+          58,
+
+        y:
+          83
+
+      },
+
+      actors: [
+
+        {
+
+          id:
+            "priority_ally",
+
+          type:
+            "priorityAlly",
+
+          short:
+            "ALLY",
+
+          label:
+            "Priority ally",
+
+          x:
+            60,
+
+          y:
+            60,
+
+          visible:
+            true
+
+        },
+
+        {
+
+          id:
+            "frontline",
+
+          type:
+            "frontline",
+
+          short:
+            "FRONT",
+
+          label:
+            "Allied frontline",
+
+          x:
+            46,
+
+          y:
+            48,
+
+          visible:
+            true
+
+        },
+
+        {
+
+          id:
+            "primary_enemy",
+
+          type:
+            "enemyThreat",
+
+          short:
+            "ENEMY",
+
+          label:
+            "Visible primary threat",
+
+          x:
+            23,
+
+          y:
+            39,
+
+          visible:
+            true
+
+        },
+
+        {
+
+          id:
+            "objective",
+
+          type:
+            "objective",
+
+          short:
+            "OBJ",
+
+          label:
+            "Current objective",
+
+          x:
+            47,
+
+          y:
+            28,
+
+          visible:
+            true
+
+        },
+
+        {
+
+          id:
+            "unknown_enemy",
+
+          type:
+            "uncertainThreat",
+
+          short:
+            "?",
+
+          label:
+            "Enemy location uncertain",
+
+          x:
+            92,
+
+          y:
+            37,
+
+          visible:
+            false
+
+        }
+
+      ],
+
+      facts: [
+
+        "Your priority ally is participating near the objective.",
+
+        "A visible enemy threat is approaching from the left side.",
+
+        "An allied frontline is available.",
+
+        "Another enemy is currently missing from confirmed vision."
+
+      ],
+
+      inferences: [
+
+        "Moving too far toward the visible enemy increases exposure.",
+
+        "Moving too far toward the uncertain side increases commitment into incomplete information.",
+
+        "Staying too far back can disconnect Rafaela from the objective fight."
+
+      ],
+
+      unknowns: [
+
+        "The missing enemy's exact location is unknown.",
+
+        "The missing enemy's exact next action is unknown."
+
+      ]
+
+    },
+
+
+    /*
+    ----------------------------------------------------------
+    2. PEEL FOR PRIORITY ALLY
+    ----------------------------------------------------------
+    */
+
+    {
+
+      id:
+        "peel_priority_ally",
+
+      title:
+        "Protect the Priority Ally",
+
+      instruction:
+        "Position Rafaela to remain available for the threatened ally while avoiding a position that lets the enemy reach both of you easily.",
+
+      difficultyName:
+        "Foundational",
+
+      weights: {
+
+        participation:
+          0.18,
+
+        allyAccess:
+          0.27,
+
+        threatSafety:
+          0.24,
+
+        objectiveAccess:
+          0.05,
+
+        escapeSpace:
+          0.16,
+
+        uncertaintySafety:
+          0.10
+
+      },
+
+      startPosition: {
+
+        x:
+          48,
+
+        y:
+          82
+
+      },
+
+      actors: [
+
+        {
+
+          id:
+            "priority_ally",
+
+          type:
+            "priorityAlly",
+
+          short:
+            "ALLY",
+
+          label:
+            "Priority ally under pressure",
+
+          x:
+            55,
+
+          y:
+            61,
+
+          visible:
+            true
+
+        },
+
+        {
+
+          id:
+            "frontline",
+
+          type:
+            "frontline",
+
+          short:
+            "FRONT",
+
+          label:
+            "Allied frontline",
+
+          x:
+            43,
+
+          y:
+            49,
+
+          visible:
+            true
+
+        },
+
+        {
+
+          id:
+            "primary_enemy",
+
+          type:
+            "enemyThreat",
+
+          short:
+            "THREAT",
+
+          label:
+            "Enemy dive threat",
+
+          x:
+            69,
+
+          y:
+            33,
+
+          visible:
+            true
+
+        },
+
+        {
+
+          id:
+            "secondary_enemy",
+
+          type:
+            "secondaryThreat",
+
+          short:
+            "ENEMY",
+
+          label:
+            "Secondary enemy",
+
+          x:
+            31,
+
+          y:
+            31,
+
+          visible:
+            true
+
+        }
+
+      ],
+
+      facts: [
+
+        "The priority ally is exposed to an enemy dive threat.",
+
+        "Two enemy threats are visible.",
+
+        "Your frontline is closer to the enemy than the priority ally."
+
+      ],
+
+      inferences: [
+
+        "Rafaela needs enough proximity to respond if the ally is engaged.",
+
+        "Standing directly on top of the ally can allow one enemy action to threaten both positions.",
+
+        "Excessive distance would remove Rafaela from the protection window."
+
+      ],
+
+      unknowns: [
+
+        "The exact enemy commitment timing is not known."
+
+      ]
+
+    },
+
+
+    /*
+    ----------------------------------------------------------
+    3. FOLLOW AN ALLIED ENGAGE
+    ----------------------------------------------------------
+    */
+
+    {
+
+      id:
+        "follow_frontline",
+
+      title:
+        "Follow the Frontline Without Overcommitting",
+
+      instruction:
+        "Position close enough to support the frontline's play while preserving enough separation and retreat space to continue supporting afterward.",
+
+      difficultyName:
+        "Intermediate",
+
+      weights: {
+
+        participation:
+          0.24,
+
+        allyAccess:
+          0.18,
+
+        threatSafety:
+          0.21,
+
+        objectiveAccess:
+          0.10,
+
+        escapeSpace:
+          0.17,
+
+        uncertaintySafety:
+          0.10
+
+      },
+
+      startPosition: {
+
+        x:
+          35,
+
+        y:
+          80
+
+      },
+
+      actors: [
+
+        {
+
+          id:
+            "priority_ally",
+
+          type:
+            "priorityAlly",
+
+          short:
+            "ALLY",
+
+          label:
+            "Damage ally",
+
+          x:
+            42,
+
+          y:
+            68,
+
+          visible:
+            true
+
+        },
+
+        {
+
+          id:
+            "frontline",
+
+          type:
+            "frontline",
+
+          short:
+            "FRONT",
+
+          label:
+            "Engaging frontline",
+
+          x:
+            52,
+
+          y:
+            46,
+
+          visible:
+            true
+
+        },
+
+        {
+
+          id:
+            "primary_enemy",
+
+          type:
+            "enemyThreat",
+
+          short:
+            "THREAT",
+
+          label:
+            "Primary enemy threat",
+
+          x:
+            70,
+
+          y:
+            33,
+
+          visible:
+            true
+
+        },
+
+        {
+
+          id:
+            "objective",
+
+          type:
+            "objective",
+
+          short:
+            "OBJ",
+
+          label:
+            "Relevant objective area",
+
+          x:
+            59,
+
+          y:
+            24,
+
+          visible:
+            true
+
+        }
+
+      ],
+
+      facts: [
+
+        "Your frontline is moving toward the enemy.",
+
+        "Your damage ally remains behind the frontline.",
+
+        "The objective is relevant to the current play."
+
+      ],
+
+      inferences: [
+
+        "If Rafaela stays too far behind, the frontline may engage without support.",
+
+        "If Rafaela follows too deeply, she can become another easy target.",
+
+        "The useful position should connect the frontline and the rest of the team."
+
+      ],
+
+      unknowns: [
+
+        "The enemy's exact response to the frontline's advance is not yet known."
+
+      ]
+
+    },
+
+
+    /*
+    ----------------------------------------------------------
+    4. DISENGAGE / LOST POSITION
+    ----------------------------------------------------------
+    */
+
+    {
+
+      id:
+        "disengage",
+
+      title:
+        "Disengage Without Abandoning the Team",
+
+      instruction:
+        "Position Rafaela to preserve a retreat route and assist nearby allies without turning the retreat into additional deaths.",
+
+      difficultyName:
+        "Intermediate",
+
+      weights: {
+
+        participation:
+          0.14,
+
+        allyAccess:
+          0.20,
+
+        threatSafety:
+          0.27,
+
+        objectiveAccess:
+          0.03,
+
+        escapeSpace:
+          0.26,
+
+        uncertaintySafety:
+          0.10
+
+      },
+
+      startPosition: {
+
+        x:
+          51,
+
+        y:
+          52
+
+      },
+
+      actors: [
+
+        {
+
+          id:
+            "priority_ally",
+
+          type:
+            "priorityAlly",
+
+          short:
+            "ALLY",
+
+          label:
+            "Retreating ally",
+
+          x:
+            48,
+
+          y:
+            67,
+
+          visible:
+            true
+
+        },
+
+        {
+
+          id:
+            "frontline",
+
+          type:
+            "frontline",
+
+          short:
+            "FRONT",
+
+          label:
+            "Low-position frontline",
+
+          x:
+            45,
+
+          y:
+            49,
+
+          visible:
+            true
+
+        },
+
+        {
+
+          id:
+            "primary_enemy",
+
+          type:
+            "enemyThreat",
+
+          short:
+            "THREAT",
+
+          label:
+            "Enemy pursuing",
+
+          x:
+            52,
+
+          y:
+            27,
+
+          visible:
+            true
+
+        },
+
+        {
+
+          id:
+            "secondary_enemy",
+
+          type:
+            "secondaryThreat",
+
+          short:
+            "ENEMY",
+
+          label:
+            "Second pursuing enemy",
+
+          x:
+            69,
+
+          y:
+            37,
+
+          visible:
+            true
+
+        }
+
+      ],
+
+      facts: [
+
+        "The allied group is retreating.",
+
+        "Multiple enemies are advancing.",
+
+        "The nearest ally is moving toward the safer side of the battlefield."
+
+      ],
+
+      inferences: [
+
+        "Remaining too far forward risks turning one lost position into another death.",
+
+        "Retreating too far ahead of the ally can remove Rafaela's ability to assist.",
+
+        "The useful position moves with the retreat instead of remaining fixed."
+
+      ],
+
+      unknowns: [
+
+        "Whether the enemies will continue pursuing is not yet known."
+
+      ]
+
+    },
+
+
+    /*
+    ----------------------------------------------------------
+    5. OBJECTIVE FRONT-TO-BACK
+    ----------------------------------------------------------
+    */
+
+    {
+
+      id:
+        "objective_front_to_back",
+
+      title:
+        "Objective Fight — Maintain a Supportable Angle",
+
+      instruction:
+        "Find a position that keeps Rafaela relevant to the ally and objective while avoiding the enemy's easiest direct path.",
+
+      difficultyName:
+        "Intermediate",
+
+      weights: {
+
+        participation:
+          0.21,
+
+        allyAccess:
+          0.18,
+
+        threatSafety:
+          0.22,
+
+        objectiveAccess:
+          0.17,
+
+        escapeSpace:
+          0.13,
+
+        uncertaintySafety:
+          0.09
+
+      },
+
+      startPosition: {
+
+        x:
+          24,
+
+        y:
+          78
+
+      },
+
+      actors: [
+
+        {
+
+          id:
+            "priority_ally",
+
+          type:
+            "priorityAlly",
+
+          short:
+            "ALLY",
+
+          label:
+            "Priority damage ally",
+
+          x:
+            43,
+
+          y:
+            64,
+
+          visible:
+            true
+
+        },
+
+        {
+
+          id:
+            "frontline",
+
+          type:
+            "frontline",
+
+          short:
+            "FRONT",
+
+          label:
+            "Allied frontline",
+
+          x:
+            49,
+
+          y:
+            46,
+
+          visible:
+            true
+
+        },
+
+        {
+
+          id:
+            "primary_enemy",
+
+          type:
+            "enemyThreat",
+
+          short:
+            "THREAT",
+
+          label:
+            "Visible enemy threat",
+
+          x:
+            67,
+
+          y:
+            38,
+
+          visible:
+            true
+
+        },
+
+        {
+
+          id:
+            "objective",
+
+          type:
+            "objective",
+
+          short:
+            "OBJ",
+
+          label:
+            "Contested objective",
+
+          x:
+            53,
+
+          y:
+            27,
+
+          visible:
+            true
+
+        }
+
+      ],
+
+      facts: [
+
+        "Both teams are contesting an objective.",
+
+        "The frontline is between your team and the primary enemy.",
+
+        "The priority ally is positioned behind the frontline."
+
+      ],
+
+      inferences: [
+
+        "Rafaela should remain relevant to both ally support and objective pressure.",
+
+        "Standing directly in the enemy-to-ally path can make Rafaela easier to engage.",
+
+        "The frontline can reduce access pressure when positioned between Rafaela and the threat."
+
+      ],
+
+      unknowns: [
+
+        "Enemy follow-up resources are not fully known."
+
+      ]
+
+    }
+
+  ],
+
+
+  /*
+  ==========================================================
+  SCENARIO GENERATION
+  ==========================================================
+  */
+
+
+  scenarioCursor:
+    0,
+
+
+  generateNextTrainingScenario:
+    function() {
+
+      if (
+        this.scenarioTemplates.length ===
+        0
+      ) {
+
+        return null;
+
+      }
+
+
+      /*
+      Rotate through different contexts instead of
+      repeating only one map situation.
+
+      This supports varied practice and interleaving.
+      */
+
+      const template =
+        this.scenarioTemplates[
+          this.scenarioCursor
+          %
+          this.scenarioTemplates.length
+        ];
+
+
+      this.scenarioCursor++;
+
+
+      const scenario =
+        JSON.parse(
+          JSON.stringify(
+            template
+          )
+        );
+
+
+      const curriculumMatch =
+        this.findPositioningConcept();
+
+
+      scenario.conceptId =
+        curriculumMatch
+        ?
+        curriculumMatch.conceptId
+        :
+        "positioning";
+
+
+      scenario.selection = {
+
+        conceptId:
+          scenario.conceptId,
+
+        conceptName:
+          curriculumMatch
+          ?
+          curriculumMatch.conceptName
+          :
+          "Positioning",
+
+        domainName:
+          curriculumMatch
+          ?
+          curriculumMatch.domainName
+          :
+          "Universal Fundamentals"
+
+      };
+
+
+      return scenario;
+
+    },
+
+
+  /*
+  ==========================================================
+  ALLY ACCESS
+  ==========================================================
+  */
+
+
+  scoreAllyAccess:
+    function(
+      scenario,
+      position
+    ) {
+
+      const ally =
+        this.actorByType(
+          scenario,
+          "priorityAlly"
+        );
+
+
+      if (
+        !ally
+      ) {
+
+        return 70;
+
+      }
+
+
+      const distance =
+        this.distance(
+          position,
+          ally
+        );
+
+
+      /*
+      Strong support access should be close enough
+      to participate, but we do NOT reward physically
+      overlapping the ally.
+
+      Again: these are abstract simulation distances.
+      */
+
+      let score =
+        this.rangeScore(
+          distance,
+          11,
+          24,
+          19
+        );
+
+
+      /*
+      Heavy anti-stacking penalty.
+
+      This directly fixes the problem visible in the
+      screenshot where TARGET could appear almost
+      on top of ALLY.
+      */
+
+      if (
+        distance < 8
+      ) {
+
+        score *=
+          0.50;
+
+      }
+
+
+      if (
+        distance < 5
+      ) {
+
+        score *=
+          0.35;
+
+      }
+
+
+      return this.roundScore(
+        score
+      );
+
+    },
+
+
+  /*
+  ==========================================================
+  THREAT SAFETY
+  ==========================================================
+  */
+
+
+  scoreThreatSafety:
+    function(
+      scenario,
+      position
+    ) {
+
+      const threats =
+        this.visibleThreats(
+          scenario
+        );
+
+
+      if (
+        threats.length ===
+        0
+      ) {
+
+        return 85;
+
+      }
+
+
+      const individualScores =
+        threats.map(
+          (threat) => {
+
+            const distance =
+              this.distance(
+                position,
+                threat
+              );
+
+
+            return this.fartherIsSafer(
+              distance,
+              10,
+              34
+            );
+
+          }
+        );
+
+
+      /*
+      The nearest / most dangerous visible threat
+      should matter more than an average that could
+      hide one severe exposure.
+      */
+
+      const minimum =
+        Math.min(
+          ...individualScores
+        );
+
+
+      const mean =
+        this.average(
+          individualScores
+        );
+
+
+      let score =
+        (
+          minimum
+          *
+          0.65
+        )
+        +
+        (
+          mean
+          *
+          0.35
+        );
+
+
+      /*
+      Evaluate whether Rafaela stands near the
+      direct line between a threat and the
+      priority ally.
+
+      This is an exposure proxy, not a claim
+      about specific enemy skill geometry.
+      */
+
+      const ally =
+        this.actorByType(
+          scenario,
+          "priorityAlly"
+        );
+
+
+      if (
+        ally
+      ) {
+
+        threats.forEach(
+          (threat) => {
+
+            const pathDistance =
+              this.pointToSegmentDistance(
+                position,
+                threat,
+                ally
+              );
+
+
+            if (
+              pathDistance < 7
+            ) {
+
+              score -=
+                12;
+
+            }
+
+          }
+        );
+
+      }
+
+
+      /*
+      Frontline relationship.
+
+      We do NOT require Rafaela to always be
+      behind the frontline.
+
+      We only give a modest benefit when the
+      frontline is genuinely positioned between
+      Rafaela and the nearest threat.
+      */
+
+      const frontline =
+        this.actorByType(
+          scenario,
+          "frontline"
+        );
+
+
+      if (
+        frontline
+      ) {
+
+        const nearestThreat =
+          threats
+            .slice()
+            .sort(
+              (a, b) => {
+
+                return (
+                  this.distance(
+                    position,
+                    a
+                  )
+                  -
+                  this.distance(
+                    position,
+                    b
+                  )
+                );
+
+              }
+            )[0];
+
+
+        const candidateToThreat =
+          this.distance(
+            position,
+            nearestThreat
+          );
+
+
+        const frontlineToThreat =
+          this.distance(
+            frontline,
+            nearestThreat
+          );
+
+
+        const coverLineDistance =
+          this.pointToSegmentDistance(
+            frontline,
+            nearestThreat,
+            position
+          );
+
+
+        const frontlineBetween =
+          (
+            frontlineToThreat
+            <
+            candidateToThreat
+          );
+
+
+        if (
+          frontlineBetween
+          &&
+          coverLineDistance < 11
+        ) {
+
+          score +=
+            10;
+
+        }
+
+      }
+
+
+      return this.roundScore(
+        score
+      );
+
+    },
+
+
+  /*
+  ==========================================================
+  OBJECTIVE ACCESS
+  ==========================================================
+  */
+
+
+  scoreObjectiveAccess:
+    function(
+      scenario,
+      position
+    ) {
+
+      const objective =
+        this.actorByType(
+          scenario,
+          "objective"
+        );
+
+
+      if (
+        !objective
+      ) {
+
+        /*
+        Objective access is neutral when the
+        scenario deliberately has no relevant
+        immediate objective actor.
+        */
+
+        return 75;
+
+      }
+
+
+      const distance =
+        this.distance(
+          position,
+          objective
+        );
+
+
+      let score =
+        this.rangeScore(
+          distance,
+          17,
+          33,
+          24
+        );
+
+
+      /*
+      Rafaela does not gain extra training credit
+      for sitting directly on the objective marker.
+      */
+
+      if (
+        distance < 8
+      ) {
+
+        score *=
+          0.65;
+
+      }
+
+
+      return this.roundScore(
+        score
+      );
+
+    },
+
+
+  /*
+  ==========================================================
+  ESCAPE SPACE
+  ==========================================================
+  */
+
 
   scoreEscapeSpace:
     function(
+      scenario,
       position
     ) {
+
+      const threats =
+        this.visibleThreats(
+          scenario
+        );
+
+
+      if (
+        threats.length ===
+        0
+      ) {
+
+        return 80;
+
+      }
+
+
+      const nearestThreat =
+        threats
+          .slice()
+          .sort(
+            (a, b) => {
+
+              return (
+                this.distance(
+                  position,
+                  a
+                )
+                -
+                this.distance(
+                  position,
+                  b
+                )
+              );
+
+            }
+          )[0];
+
+
+      const room =
+        this.escapeRoomFromThreat(
+          position,
+          nearestThreat
+        );
+
+
+      /*
+      More usable space in the direction away
+      from the threat generally gives more
+      retreat options.
+      */
+
+      let roomScore =
+        this.clamp(
+          (
+            room
+            /
+            35
+          )
+          *
+          100,
+          0,
+          100
+        );
+
+
+      /*
+      Standing extremely near any map boundary
+      can reduce available movement options.
+      */
 
       const edgeDistance =
         Math.min(
@@ -1576,27 +2326,43 @@ window.RafaelaScenarios = {
         );
 
 
-      return this.clamp(
-        edgeDistance
-        /
-        20
-        *
-        100,
-        0,
-        100
+      const edgeScore =
+        this.clamp(
+          (
+            edgeDistance
+            /
+            16
+          )
+          *
+          100,
+          0,
+          100
+        );
+
+
+      return this.roundScore(
+        (
+          roomScore
+          *
+          0.72
+        )
+        +
+        (
+          edgeScore
+          *
+          0.28
+        )
       );
 
     },
 
 
   /*
-    Uncertainty safety proxy.
-
-    When a threat is known to be missing from one side,
-    reward avoiding the most obvious exposed flank.
-
-    This does NOT assume the threat is actually there.
+  ==========================================================
+  UNCERTAINTY SAFETY
+  ==========================================================
   */
+
 
   scoreUncertaintySafety:
     function(
@@ -1604,235 +2370,83 @@ window.RafaelaScenarios = {
       position
     ) {
 
-      if (
-        !scenario.hiddenThreatSide
-      ) {
-
-        return 100;
-
-      }
-
-
-      const centerDifference =
-        position.x
-        -
-        50;
-
-
-      if (
-        scenario.hiddenThreatSide < 0
-      ) {
-
-        return this.clamp(
-          60
-          +
-          centerDifference
-          *
-          2,
-          0,
-          100
+      const uncertain =
+        this.uncertainThreats(
+          scenario
         );
 
+
+      if (
+        uncertain.length ===
+        0
+      ) {
+
+        return 85;
+
       }
 
 
-      return this.clamp(
-        60
-        -
-        centerDifference
-        *
-        2,
-        0,
-        100
+      const scores =
+        uncertain.map(
+          (source) => {
+
+            /*
+            The '?' actor represents the SIDE /
+            SOURCE OF UNCERTAINTY, not the enemy's
+            confirmed exact coordinate.
+            */
+
+            const distance =
+              this.distance(
+                position,
+                source
+              );
+
+
+            return this.fartherIsSafer(
+              distance,
+              15,
+              39
+            );
+
+          }
+        );
+
+
+      return this.roundScore(
+        Math.min(
+          ...scores
+        )
       );
 
     },
 
 
   /*
-    ------------------------------------------------
-    POSITION EVALUATION
-    ------------------------------------------------
+  ==========================================================
+  PARTICIPATION
+  ==========================================================
   */
 
 
-  evaluatePosition:
+  scoreParticipation:
     function(
       scenario,
-      position
+      position,
+      allyAccess,
+      objectiveAccess
     ) {
 
-      const rafaela = {
-
-        x:
-          this.clamp(
-            Number(
-              position.x
-            ),
-            0,
-            100
-          ),
-
-        y:
-          this.clamp(
-            Number(
-              position.y
-            ),
-            0,
-            100
-          )
-
-      };
-
-
-      const priorityAlly =
-        this.getActor(
-          scenario,
-          "priority_ally"
-        );
-
-
       const frontline =
-        this.getActor(
+        this.actorByType(
           scenario,
           "frontline"
         );
 
 
-      const objective =
-        this.getActor(
-          scenario,
-          "objective"
-        );
+      let frontlineAccess =
+        75;
 
-
-      const threat =
-        this.getActor(
-          scenario,
-          "primary_threat"
-        )
-        ||
-        this.getActor(
-          scenario,
-          "visible_threat"
-        );
-
-
-      const dimensions = {};
-
-
-      /*
-        Participation:
-        practical proximity to the active ally group.
-      */
-
-      if (
-        priorityAlly
-      ) {
-
-        const distance =
-          this.distance(
-            rafaela,
-            priorityAlly
-          );
-
-
-        dimensions.participation =
-          this.scoreMaximumDistance(
-            distance,
-            30
-          );
-
-
-        dimensions.allyAccess =
-          this.scoreCloseness(
-            distance,
-            20,
-            24
-          );
-
-      }
-
-      else {
-
-        dimensions.participation =
-          70;
-
-
-        dimensions.allyAccess =
-          70;
-
-      }
-
-
-      /*
-        Threat safety:
-        reward separation from visible primary threat.
-      */
-
-      if (
-        threat
-      ) {
-
-        const distance =
-          this.distance(
-            rafaela,
-            threat
-          );
-
-
-        dimensions.threatSafety =
-          this.scoreMinimumDistance(
-            distance,
-            24
-          );
-
-      }
-
-      else {
-
-        dimensions.threatSafety =
-          75;
-
-      }
-
-
-      /*
-        Objective access.
-      */
-
-      if (
-        objective
-      ) {
-
-        const distance =
-          this.distance(
-            rafaela,
-            objective
-          );
-
-
-        dimensions.objectiveAccess =
-          this.scoreMaximumDistance(
-            distance,
-            45
-          );
-
-      }
-
-      else {
-
-        dimensions.objectiveAccess =
-          80;
-
-      }
-
-
-      /*
-        Frontline separation:
-        avoid occupying almost the exact
-        same location as frontline.
-      */
 
       if (
         frontline
@@ -1840,87 +2454,117 @@ window.RafaelaScenarios = {
 
         const distance =
           this.distance(
-            rafaela,
+            position,
             frontline
           );
 
 
-        dimensions.frontlineSeparation =
-          this.scoreMinimumDistance(
+        frontlineAccess =
+          this.rangeScore(
             distance,
-            11
+            13,
+            31,
+            24
           );
 
       }
 
-      else {
 
-        dimensions.frontlineSeparation =
-          85;
+      return this.roundScore(
+        (
+          allyAccess
+          *
+          0.46
+        )
+        +
+        (
+          frontlineAccess
+          *
+          0.29
+        )
+        +
+        (
+          objectiveAccess
+          *
+          0.25
+        )
+      );
 
-      }
+    },
 
 
-      dimensions.escapeSpace =
-        this.scoreEscapeSpace(
-          rafaela
-        );
+  /*
+  ==========================================================
+  CROWDING / OVERLAP PENALTY
+  ==========================================================
+  */
 
 
-      dimensions.uncertaintySafety =
-        this.scoreUncertaintySafety(
-          scenario,
-          rafaela
-        );
+  getCrowdingPenalty:
+    function(
+      scenario,
+      position
+    ) {
+
+      let penalty =
+        0;
 
 
-      /*
-        Weighted overall score.
-      */
-
-      const weights =
-        scenario.focusWeights
+      (
+        scenario.actors
         ||
-        {};
+        []
+      )
+      .forEach(
+        (actor) => {
+
+          /*
+          The uncertain '?' marker is conceptual.
+          Do not apply physical actor-overlap rules
+          to it.
+          */
+
+          if (
+            actor.visible ===
+            false
+          ) {
+
+            return;
+
+          }
 
 
-      let totalWeight =
-        0;
-
-
-      let weightedScore =
-        0;
-
-
-      Object.keys(
-        dimensions
-      ).forEach(
-        (key) => {
-
-          const weight =
-            Number(
-              weights[
-                key
-              ]
-            )
-            ||
-            0;
+          const distance =
+            this.distance(
+              position,
+              actor
+            );
 
 
           if (
-            weight > 0
+            distance < 4
           ) {
 
-            totalWeight +=
-              weight;
+            penalty +=
+              34;
 
+          }
 
-            weightedScore +=
-              dimensions[
-                key
-              ]
-              *
-              weight;
+          else if (
+            distance < 7
+          ) {
+
+            penalty +=
+              20;
+
+          }
+
+          else if (
+            distance < 9
+          ) {
+
+            penalty +=
+              8;
 
           }
 
@@ -1928,46 +2572,165 @@ window.RafaelaScenarios = {
       );
 
 
-      const overall =
-        totalWeight > 0
-        ?
-        weightedScore
-        /
-        totalWeight
-        :
-        0;
+      return this.clamp(
+        penalty,
+        0,
+        55
+      );
+
+    },
 
 
-      /*
-        Find strongest and weakest dimensions.
-      */
+  /*
+  ==========================================================
+  CRITICAL POSITION CHECKS
+  ==========================================================
+  */
 
-      const activeDimensions =
-        Object.keys(
-          dimensions
-        )
-        .filter(
-          (key) => {
 
-            return (
-              Number(
-                weights[
-                  key
-                ]
-              )
-              >
-              0
+  getCriticalFlags:
+    function(
+      scenario,
+      position
+    ) {
+
+      const flags =
+        [];
+
+
+      const ally =
+        this.actorByType(
+          scenario,
+          "priorityAlly"
+        );
+
+
+      const threats =
+        this.visibleThreats(
+          scenario
+        );
+
+
+      if (
+        ally
+      ) {
+
+        const allyDistance =
+          this.distance(
+            position,
+            ally
+          );
+
+
+        if (
+          allyDistance > 43
+        ) {
+
+          flags.push(
+            "disconnected_from_priority_ally"
+          );
+
+        }
+
+      }
+
+
+      threats.forEach(
+        (threat) => {
+
+          const threatDistance =
+            this.distance(
+              position,
+              threat
+            );
+
+
+          if (
+            threatDistance < 9
+          ) {
+
+            flags.push(
+              "extreme_visible_threat_exposure"
             );
 
           }
+
+        }
+      );
+
+
+      const crowding =
+        this.getCrowdingPenalty(
+          scenario,
+          position
+        );
+
+
+      if (
+        crowding >= 30
+      ) {
+
+        flags.push(
+          "actor_overlap"
+        );
+
+      }
+
+
+      return flags;
+
+    },
+
+
+  /*
+  ==========================================================
+  FEEDBACK GENERATION
+  ==========================================================
+  */
+
+
+  getWeakestDimension:
+    function(dimensions) {
+
+      const labels = {
+
+        participation:
+          "Participation",
+
+        allyAccess:
+          "Ally Access",
+
+        threatSafety:
+          "Threat Safety",
+
+        objectiveAccess:
+          "Objective Access",
+
+        escapeSpace:
+          "Escape Space",
+
+        uncertaintySafety:
+          "Uncertainty Safety"
+
+      };
+
+
+      const entries =
+        Object.keys(
+          labels
         )
         .map(
-          (key) => {
+          function(key) {
 
             return {
 
               key:
                 key,
+
+              label:
+                labels[
+                  key
+                ],
 
               score:
                 dimensions[
@@ -1980,8 +2743,8 @@ window.RafaelaScenarios = {
         );
 
 
-      activeDimensions.sort(
-        (a, b) => {
+      entries.sort(
+        function(a, b) {
 
           return (
             a.score
@@ -1993,313 +2756,318 @@ window.RafaelaScenarios = {
       );
 
 
-      const weakest =
-        activeDimensions[
-          0
-        ]
-        ||
-        null;
-
-
-      const strongest =
-        activeDimensions[
-          activeDimensions.length
-          -
-          1
-        ]
-        ||
-        null;
-
-
-      const feedback =
-        this.buildPositionFeedback(
-          scenario,
-          dimensions,
-          weakest,
-          overall
-        );
-
-
-      return {
-
-        scenarioId:
-          scenario.id,
-
-        conceptId:
-          scenario.requestedConceptId,
-
-        practiceType:
-          "decision_practice",
-
-        overall:
-          Math.round(
-            overall
-          ),
-
-        dimensions: {
-
-          participation:
-            Math.round(
-              dimensions.participation
-            ),
-
-          allyAccess:
-            Math.round(
-              dimensions.allyAccess
-            ),
-
-          threatSafety:
-            Math.round(
-              dimensions.threatSafety
-            ),
-
-          objectiveAccess:
-            Math.round(
-              dimensions.objectiveAccess
-            ),
-
-          frontlineSeparation:
-            Math.round(
-              dimensions.frontlineSeparation
-            ),
-
-          escapeSpace:
-            Math.round(
-              dimensions.escapeSpace
-            ),
-
-          uncertaintySafety:
-            Math.round(
-              dimensions.uncertaintySafety
-            )
-
-        },
-
-        weakest:
-          weakest,
-
-        strongest:
-          strongest,
-
-        successful:
-          overall >= 75,
-
-        feedback:
-          feedback,
-
-        limitation:
-          scenario.evidenceLimit
-
-      };
+      return entries[
+        0
+      ];
 
     },
 
 
-  /*
-    ------------------------------------------------
-    FEEDBACK
-    ------------------------------------------------
-  */
-
-
-  dimensionLabels: {
-
-    participation:
-      "Participation",
-
-    allyAccess:
-      "Ally Access",
-
-    threatSafety:
-      "Threat Safety",
-
-    objectiveAccess:
-      "Objective Access",
-
-    frontlineSeparation:
-      "Frontline Separation",
-
-    escapeSpace:
-      "Escape Space",
-
-    uncertaintySafety:
-      "Uncertainty Safety"
-
-  },
-
-
-  correctionLibrary: {
-
-    participation: {
-
-      action:
-        "Move closer to the relevant play while preserving a safer angle.",
-
-      reason:
-        "Excessive safety can remove Rafaela from the action.",
-
-      check:
-        "If the play started now, could Rafaela contribute immediately?"
-    },
-
-
-    allyAccess: {
-
-      action:
-        "Improve your angle or distance to the ally who matters most to this play.",
-
-      reason:
-        "Support value depends on being able to influence the relevant ally.",
-
-      check:
-        "Can Rafaela support the priority ally without first making a major reposition?"
-    },
-
-
-    threatSafety: {
-
-      action:
-        "Create more separation or a less direct angle from the primary threat.",
-
-      reason:
-        "Rafaela loses repeated support value if she becomes an easy early target.",
-
-      check:
-        "Would the enemy need meaningful effort to reach Rafaela?"
-    },
-
-
-    objectiveAccess: {
-
-      action:
-        "Shift toward a position that preserves meaningful access to the objective area.",
-
-      reason:
-        "Being safe but disconnected from the team's objective reduces practical value.",
-
-      check:
-        "Can Rafaela participate if the objective contest begins now?"
-    },
-
-
-    frontlineSeparation: {
-
-      action:
-        "Support the frontline from different depth or angle instead of occupying the same danger zone.",
-
-      reason:
-        "Different heroes tolerate different amounts of exposure.",
-
-      check:
-        "Are you supporting the frontline, or simply copying its position?"
-    },
-
-
-    escapeSpace: {
-
-      action:
-        "Choose a position with a clearer next movement option.",
-
-      reason:
-        "A position becomes fragile when pressure removes every practical exit.",
-
-      check:
-        "If pressure arrives, where is Rafaela's next position?"
-    },
-
-
-    uncertaintySafety: {
-
-      action:
-        "Reduce exposure to the most obvious unseen collapse route without abandoning the play.",
-
-      reason:
-        "Missing information should change risk management without forcing total passivity.",
-
-      check:
-        "Are you respecting the unseen threat while still remaining useful?"
-    }
-
-  },
-
-
-  buildPositionFeedback:
+  buildFeedback:
     function(
       scenario,
       dimensions,
-      weakest,
-      overall
+      overall,
+      flags
     ) {
 
-      if (
-        !weakest
-      ) {
-
-        return {
-
-          title:
-            "Position Recorded",
-
-          cue:
-            scenario.instruction,
-
-          action:
-            "Reassess as the game state changes.",
-
-          reason:
-            "Positioning is dynamic rather than one permanent correct location.",
-
-          exception:
-            "A changing threat, ally, objective, or route can change the correct position.",
-
-          resultCheck:
-            "What changed after your action?"
-
-        };
-
-      }
+      const weakest =
+        this.getWeakestDimension(
+          dimensions
+        );
 
 
-      const correction =
-        this.correctionLibrary[
-          weakest.key
-        ];
-
-
-      let title;
+      let title =
+        "Usable Position";
 
 
       if (
-        overall >= 90
+        overall >= 88
       ) {
 
         title =
-          "Strong Decision";
+          "Strong Position";
 
       }
 
       else if (
-        overall >= 75
+        overall >= 76
       ) {
 
         title =
-          "Usable — Refine the Weakest Area";
+          "Good — Refine the Position";
 
       }
 
       else if (
-        overall >= 55
+        overall >= 62
       ) {
 
         title =
-          "Developing Position";
+          "Usable — Important Tradeoff";
 
       }
 
       else {
 
         title =
-          "Major Reposition Needed";
+          "Reposition";
+
+      }
+
+
+      if (
+        flags.includes(
+          "extreme_visible_threat_exposure"
+        )
+      ) {
+
+        title =
+          "Too Exposed";
+
+      }
+
+
+      else if (
+        flags.includes(
+          "disconnected_from_priority_ally"
+        )
+      ) {
+
+        title =
+          "Too Disconnected";
+
+      }
+
+
+      else if (
+        flags.includes(
+          "actor_overlap"
+        )
+      ) {
+
+        title =
+          "Too Crowded";
+
+      }
+
+
+      const feedbackMap = {
+
+        participation: {
+
+          mainCorrection:
+            "Reconnect to the play",
+
+          action:
+            "Move toward a position that lets Rafaela influence the relevant ally, frontline, or objective without sacrificing unnecessary safety.",
+
+          reason:
+            "A position can be very safe but still poor if Rafaela cannot affect the play when action begins.",
+
+          exception:
+            "Temporary distance can be correct during a reset, retreat, or when joining the play would create a larger loss.",
+
+          resultCheck:
+            "If the fight starts now, can Rafaela contribute quickly enough to matter?"
+
+        },
+
+
+        allyAccess: {
+
+          mainCorrection:
+            "Improve ally access",
+
+          action:
+            "Move closer to the priority ally while keeping enough separation that one enemy action does not easily threaten both positions.",
+
+          reason:
+            "Rafaela needs practical access to the ally she may need to enable or protect, but stacking directly on that ally can reduce spacing.",
+
+          exception:
+            "The priority ally can change when another teammate becomes more important to the immediate win condition.",
+
+          resultCheck:
+            "Can Rafaela assist the relevant ally quickly without occupying the exact same danger space?"
+
+        },
+
+
+        threatSafety: {
+
+          mainCorrection:
+            "Reduce threat access",
+
+          action:
+            "Create more separation from the most relevant visible threat and move away from its easiest direct access path while staying connected to allies.",
+
+          reason:
+            "Rafaela loses support value if the enemy can remove her before she contributes meaningfully.",
+
+          exception:
+            "Some calculated forward positioning is justified when the expected gain is worth the exposure and allies can immediately participate.",
+
+          resultCheck:
+            "Can the visible threat reach Rafaela more easily than necessary?"
+
+        },
+
+
+        objectiveAccess: {
+
+          mainCorrection:
+            "Reconnect to the objective",
+
+          action:
+            "Shift toward a position that keeps the objective within the team's practical support area without standing directly on the most contested space.",
+
+          reason:
+            "Being alive but irrelevant to the objective can still be a positioning failure.",
+
+          exception:
+            "Objective proximity matters less when the correct team decision is to concede, reset, defend elsewhere, or protect another win condition.",
+
+          resultCheck:
+            "Does Rafaela's current position meaningfully support the objective plan?"
+
+        },
+
+
+        escapeSpace: {
+
+          mainCorrection:
+            "Preserve a retreat lane",
+
+          action:
+            "Move to a position with more usable space behind Rafaela relative to the primary threat while remaining close enough to participate.",
+
+          reason:
+            "A support position is stronger when Rafaela can contribute and still reposition after the enemy responds.",
+
+          exception:
+            "Retreat space can be traded for commitment when the team has a justified decisive opportunity.",
+
+          resultCheck:
+            "If the enemy advances now, does Rafaela have somewhere useful to move?"
+
+        },
+
+
+        uncertaintySafety: {
+
+          mainCorrection:
+            "Respect missing information",
+
+          action:
+            "Shift away from the unverified threat side while preserving access to the ally and objective.",
+
+          reason:
+            "Unknown information should change positioning even when it does not prove where the missing enemy actually is.",
+
+          exception:
+            "Once reliable information resolves the uncertainty, Rafaela can reposition more aggressively or more specifically.",
+
+          resultCheck:
+            "Are you committing toward a threat that has not actually been located?"
+
+        }
+
+      };
+
+
+      let feedback =
+        feedbackMap[
+          weakest.key
+        ];
+
+
+      /*
+      Critical flags override ordinary weakest-score
+      coaching because they represent a more urgent
+      positioning error.
+      */
+
+      if (
+        flags.includes(
+          "extreme_visible_threat_exposure"
+        )
+      ) {
+
+        feedback = {
+
+          mainCorrection:
+            "Leave the immediate threat zone",
+
+          action:
+            "Increase separation from the visible threat first, then reconnect to the ally from a safer angle.",
+
+          reason:
+            "Immediate exposure has higher priority because being removed prevents Rafaela from performing every other support function.",
+
+          exception:
+            "Brief forward commitment can be justified when it produces a higher-value team outcome and the risk is intentional.",
+
+          resultCheck:
+            "Can Rafaela remain alive long enough to perform the next support action?"
+
+        };
+
+      }
+
+
+      else if (
+        flags.includes(
+          "disconnected_from_priority_ally"
+        )
+      ) {
+
+        feedback = {
+
+          mainCorrection:
+            "Reconnect to the team",
+
+          action:
+            "Move toward the relevant ally group while preserving separation from enemy threat paths.",
+
+          reason:
+            "Excessive safety removes Rafaela from the actual play and prevents timely support.",
+
+          exception:
+            "Distance can be correct when the team itself should disengage or when another location has higher strategic priority.",
+
+          resultCheck:
+            "If the ally is engaged now, can Rafaela realistically influence the outcome?"
+
+        };
+
+      }
+
+
+      else if (
+        flags.includes(
+          "actor_overlap"
+        )
+      ) {
+
+        feedback = {
+
+          mainCorrection:
+            "Create functional spacing",
+
+          action:
+            "Move slightly away from the nearby actor while maintaining access to the same play.",
+
+          reason:
+            "The simulator discourages stacking because useful support positioning usually benefits from maintaining its own movement and response space.",
+
+          exception:
+            "This is an abstract training rule, not a claim that a fixed separation distance is always required in MLBB.",
+
+          resultCheck:
+            "Can Rafaela preserve access without occupying almost the exact same position?"
+
+        };
 
       }
 
@@ -2309,25 +3077,23 @@ window.RafaelaScenarios = {
         title:
           title,
 
-        cue:
-          scenario.instruction,
-
         mainCorrection:
-          this.dimensionLabels[
-            weakest.key
-          ],
+          feedback.mainCorrection,
 
         action:
-          correction.action,
+          feedback.action,
 
         reason:
-          correction.reason,
+          feedback.reason,
 
         exception:
-          "The priority may change when new information, resources, numbers, objectives, or threats change.",
+          feedback.exception,
 
         resultCheck:
-          correction.check
+          feedback.resultCheck,
+
+        weakestDimension:
+          weakest.key
 
       };
 
@@ -2335,229 +3101,308 @@ window.RafaelaScenarios = {
 
 
   /*
-    ------------------------------------------------
-    ADAPTIVE DIFFICULTY
-    ------------------------------------------------
+  ==========================================================
+  MAIN POSITION EVALUATOR
+  ==========================================================
   */
 
 
-  chooseDifficulty:
+  evaluatePosition:
     function(
-      conceptId
+      scenario,
+      position
     ) {
 
       if (
-        !window.RafaelaStorage
+        !scenario
+        ||
+        !position
       ) {
 
-        return 1;
+        throw new Error(
+          "Scenario and position are required."
+        );
 
       }
 
 
-      const state =
-        window.RafaelaStorage
-          .load();
-
-
-      const record =
-        state.concepts[
-          conceptId
-        ];
-
-
-      if (!record) {
-
-        return 1;
-
-      }
-
-
-      const successes =
-        record.application.successful;
-
-
-      const errors =
-        record.application.unsuccessful;
-
-
-      const evidence =
-        record.gameplay.positiveEvidence;
-
-
-      if (
-        successes >= 8
-        &&
-        evidence >= 2
-      ) {
-
-        return 5;
-
-      }
-
-
-      if (
-        successes >= 5
-      ) {
-
-        return 4;
-
-      }
-
-
-      if (
-        successes >= 3
-      ) {
-
-        return 3;
-
-      }
-
-
-      if (
-        successes >= 1
-      ) {
-
-        return 2;
-
-      }
-
-
-      if (
-        errors >= 2
-      ) {
-
-        return 1;
-
-      }
-
-
-      return 1;
-
-    },
-
-
-  /*
-    ------------------------------------------------
-    TRAINER INTEGRATION
-    ------------------------------------------------
-  */
-
-
-  generateAdaptiveScenario:
-    function(
-      conceptId
-    ) {
-
-      const difficulty =
-        this.chooseDifficulty(
-          conceptId
+      const allyAccess =
+        this.scoreAllyAccess(
+          scenario,
+          position
         );
 
 
-      return this.generate(
-        conceptId,
+      const threatSafety =
+        this.scoreThreatSafety(
+          scenario,
+          position
+        );
+
+
+      const objectiveAccess =
+        this.scoreObjectiveAccess(
+          scenario,
+          position
+        );
+
+
+      const escapeSpace =
+        this.scoreEscapeSpace(
+          scenario,
+          position
+        );
+
+
+      const uncertaintySafety =
+        this.scoreUncertaintySafety(
+          scenario,
+          position
+        );
+
+
+      const participation =
+        this.scoreParticipation(
+          scenario,
+          position,
+          allyAccess,
+          objectiveAccess
+        );
+
+
+      const dimensions = {
+
+        participation:
+          participation,
+
+        allyAccess:
+          allyAccess,
+
+        threatSafety:
+          threatSafety,
+
+        objectiveAccess:
+          objectiveAccess,
+
+        escapeSpace:
+          escapeSpace,
+
+        uncertaintySafety:
+          uncertaintySafety
+
+      };
+
+
+      const weights =
+        scenario.weights
+        ||
         {
-          difficulty:
-            difficulty
-        }
-      );
 
-    },
+          participation:
+            0.20,
 
+          allyAccess:
+            0.20,
 
-  /*
-    Ask trainer which concept should be practiced,
-    then generate the scenario automatically.
-  */
+          threatSafety:
+            0.22,
 
-  generateNextTrainingScenario:
-    function() {
+          objectiveAccess:
+            0.13,
 
-      if (
-        !window.RafaelaTrainer
-      ) {
+          escapeSpace:
+            0.13,
 
-        return null;
+          uncertaintySafety:
+            0.12
 
-      }
+        };
 
 
-      const selection =
-        window.RafaelaTrainer
-          .chooseNextConcept();
+      let overall =
 
+        (
+          participation
+          *
+          weights.participation
+        )
 
-      if (
-        !selection
-      ) {
+        +
 
-        return null;
+        (
+          allyAccess
+          *
+          weights.allyAccess
+        )
 
-      }
+        +
 
+        (
+          threatSafety
+          *
+          weights.threatSafety
+        )
 
-      const concept =
-        selection.concept;
+        +
 
+        (
+          objectiveAccess
+          *
+          weights.objectiveAccess
+        )
 
-      const scenario =
-        this.generateAdaptiveScenario(
-          concept.id
+        +
+
+        (
+          escapeSpace
+          *
+          weights.escapeSpace
+        )
+
+        +
+
+        (
+          uncertaintySafety
+          *
+          weights.uncertaintySafety
         );
 
 
-      scenario.selection = {
+      /*
+      Apply spacing penalty AFTER the strategic
+      dimensions so TARGET will not simply sit
+      directly on another actor.
+      */
 
-        conceptName:
-          concept.name,
+      const crowdingPenalty =
+        this.getCrowdingPenalty(
+          scenario,
+          position
+        );
 
-        domainName:
-          concept.domainName,
 
-        priorityScore:
-          selection.score,
+      overall -=
+        crowdingPenalty;
 
-        reasons:
-          window.RafaelaTrainer
-            .explainSelection(
-              concept
-            )
+
+      const flags =
+        this.getCriticalFlags(
+          scenario,
+          position
+        );
+
+
+      /*
+      Critical-state caps.
+
+      These prevent a candidate from receiving
+      an apparently excellent overall score while
+      committing a major positioning error.
+      */
+
+      if (
+        flags.includes(
+          "extreme_visible_threat_exposure"
+        )
+      ) {
+
+        overall =
+          Math.min(
+            overall,
+            44
+          );
+
+      }
+
+
+      if (
+        flags.includes(
+          "disconnected_from_priority_ally"
+        )
+      ) {
+
+        overall =
+          Math.min(
+            overall,
+            57
+          );
+
+      }
+
+
+      if (
+        flags.includes(
+          "actor_overlap"
+        )
+      ) {
+
+        overall =
+          Math.min(
+            overall,
+            69
+          );
+
+      }
+
+
+      overall =
+        this.roundScore(
+          overall
+        );
+
+
+      const feedback =
+        this.buildFeedback(
+          scenario,
+          dimensions,
+          overall,
+          flags
+        );
+
+
+      /*
+      "Successful" does NOT mean mastery.
+      It only means this decision-practice rep
+      met the current simulated quality criterion.
+      */
+
+      const successful =
+        (
+          overall >= 76
+          &&
+          flags.length === 0
+        );
+
+
+      return {
+
+        conceptId:
+          scenario.conceptId
+          ||
+          "positioning",
+
+        overall:
+          overall,
+
+        successful:
+          successful,
+
+        dimensions:
+          dimensions,
+
+        feedback:
+          feedback,
+
+        flags:
+          flags,
+
+        crowdingPenalty:
+          crowdingPenalty,
+
+        limitation:
+          "Decision practice only. The battlefield uses abstract training geometry, not official MLBB ranges. The result evaluates the information represented in this scenario and does not prove real-match mechanical execution."
 
       };
-
-
-      return scenario;
-
-    },
-
-
-  /*
-    Development preview.
-  */
-
-  preview:
-    function(
-      conceptId
-    ) {
-
-      const scenario =
-        conceptId
-        ?
-        this.generateAdaptiveScenario(
-          conceptId
-        )
-        :
-        this.generateNextTrainingScenario();
-
-
-      console.log(
-        "Rafaela Gym scenario:",
-        scenario
-      );
-
-
-      return scenario;
 
     }
 
