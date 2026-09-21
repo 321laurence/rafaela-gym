@@ -13,7 +13,7 @@
   - Icons
 */
 
-const CACHE_NAME = "rafaela-gym-v4";
+const CACHE_NAME = "rafaela-gym-v5";
 
 const APP_FILES = [
   "./",
