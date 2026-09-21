@@ -1,51 +1,48 @@
 /*
-  RAFAELA GYM V2
+  RAFAELA GYM V2.1
   Application Controller
 
-  Connects:
-  curriculum.js
-  storage.js
-  trainer.js
-  scenarios.js
-
-  This controller handles:
+  Adds:
   - adaptive recommendation
-  - today's workout
-  - dynamic positioning reps
-  - scoring and feedback
-  - progress recording
-  - session continuity
+  - scenario training
+  - scoring
+  - learning ledger
+  - recommended-position reveal
+  - recommended zone
+  - target marker
+  - movement arrow
+  - answer comparison
 
-  Scenario results are decision-practice evidence only.
-  They are NOT proof of real gameplay mechanics.
+  IMPORTANT:
+  Recommended positioning is derived from the
+  current simulated scenario evaluator.
+
+  It is NOT a claim that one exact coordinate is
+  universally correct in real MLBB gameplay.
 */
 
 
 window.RafaelaApp = {
 
-  currentScenario:
-    null,
+  currentScenario: null,
 
-  currentPosition:
-    null,
+  currentPosition: null,
 
-  currentSessionId:
-    null,
+  currentSessionId: null,
 
-  currentRep:
-    0,
+  currentRep: 0,
 
-  targetReps:
-    5,
+  targetReps: 5,
 
-  sessionResults:
-    [],
+  sessionResults: [],
+
+  currentRecommendedAnswer: null,
 
 
   /*
-    -----------------------------
+    ==================================================
     STARTUP
-    -----------------------------
+    ==================================================
   */
 
 
@@ -73,7 +70,7 @@ window.RafaelaApp = {
       ) {
 
         console.error(
-          "Rafaela Gym V2 could not start because one or more core modules are missing."
+          "Rafaela Gym could not start because one or more core modules are missing."
         );
 
         this.showFatalError(
@@ -103,9 +100,9 @@ window.RafaelaApp = {
 
 
   /*
-    -----------------------------
+    ==================================================
     BASIC DOM HELPERS
-    -----------------------------
+    ==================================================
   */
 
 
@@ -186,9 +183,9 @@ window.RafaelaApp = {
 
 
   /*
-    -----------------------------
+    ==================================================
     SCREEN NAVIGATION
-    -----------------------------
+    ==================================================
   */
 
 
@@ -250,11 +247,8 @@ window.RafaelaApp = {
 
       window.scrollTo(
         {
-          top:
-            0,
-
-          behavior:
-            "smooth"
+          top: 0,
+          behavior: "smooth"
         }
       );
 
@@ -360,8 +354,7 @@ window.RafaelaApp = {
 
             this.startWorkout(
               {
-                reps:
-                  3
+                reps: 3
               }
             );
 
@@ -464,9 +457,9 @@ window.RafaelaApp = {
 
 
   /*
-    -----------------------------
+    ==================================================
     DASHBOARD
-    -----------------------------
+    ==================================================
   */
 
 
@@ -625,9 +618,9 @@ window.RafaelaApp = {
 
 
   /*
-    -----------------------------
+    ==================================================
     WORKOUT
-    -----------------------------
+    ==================================================
   */
 
 
@@ -654,6 +647,10 @@ window.RafaelaApp = {
 
       this.sessionResults =
         [];
+
+
+      this.currentRecommendedAnswer =
+        null;
 
 
       this.currentSessionId =
@@ -687,6 +684,10 @@ window.RafaelaApp = {
 
 
       this.currentRep++;
+
+
+      this.currentRecommendedAnswer =
+        null;
 
 
       this.currentScenario =
@@ -723,6 +724,9 @@ window.RafaelaApp = {
       this.renderScenario();
 
 
+      this.removeAnswerExplanation();
+
+
       this.hide(
         "feedbackPanel"
       );
@@ -746,9 +750,9 @@ window.RafaelaApp = {
 
 
   /*
-    -----------------------------
+    ==================================================
     SCENARIO RENDERING
-    -----------------------------
+    ==================================================
   */
 
 
@@ -851,7 +855,11 @@ window.RafaelaApp = {
         "";
 
 
-      values.forEach(
+      (
+        values
+        ||
+        []
+      ).forEach(
         function(value) {
 
           const item =
@@ -895,10 +903,6 @@ window.RafaelaApp = {
       board.innerHTML =
         "";
 
-
-      /*
-        Decorative map layers.
-      */
 
       const river =
         document.createElement(
@@ -945,16 +949,14 @@ window.RafaelaApp = {
       );
 
 
-      this.currentScenario
-        .actors
+      (
+        this.currentScenario
+          .actors
+        ||
+        []
+      )
         .forEach(
           (actor) => {
-
-            /*
-              Missing threats are represented
-              by uncertainty markers rather than
-              pretending their actual position is known.
-            */
 
             if (
               actor.visible ===
@@ -1058,6 +1060,15 @@ window.RafaelaApp = {
         );
 
 
+      if (
+        !board
+      ) {
+
+        return;
+
+      }
+
+
       const marker =
         document.createElement(
           "div"
@@ -1071,12 +1082,6 @@ window.RafaelaApp = {
       marker.textContent =
         "?";
 
-
-      /*
-        We intentionally show uncertainty
-        as a broad edge marker rather than
-        the hidden actor's simulated coordinate.
-      */
 
       if (
         actor.x < 50
@@ -1144,9 +1149,9 @@ window.RafaelaApp = {
 
 
   /*
-    -----------------------------
+    ==================================================
     MOVEMENT
-    -----------------------------
+    ==================================================
   */
 
 
@@ -1162,10 +1167,24 @@ window.RafaelaApp = {
       }
 
 
-      if (
-        !this.byId(
+      const feedback =
+        this.byId(
           "feedbackPanel"
-        ).hidden
+        );
+
+
+      /*
+        Once the answer is evaluated,
+        lock Rafaela's submitted position.
+
+        This makes the visual comparison honest:
+        submitted answer versus recommended answer.
+      */
+
+      if (
+        feedback
+        &&
+        !feedback.hidden
       ) {
 
         return;
@@ -1177,6 +1196,15 @@ window.RafaelaApp = {
         this.byId(
           "battlefield"
         );
+
+
+      if (
+        !board
+      ) {
+
+        return;
+
+      }
 
 
       const rect =
@@ -1259,9 +1287,9 @@ window.RafaelaApp = {
 
 
   /*
-    -----------------------------
+    ==================================================
     EVALUATION
-    -----------------------------
+    ==================================================
   */
 
 
@@ -1279,11 +1307,22 @@ window.RafaelaApp = {
       }
 
 
+      const submittedPosition = {
+
+        x:
+          this.currentPosition.x,
+
+        y:
+          this.currentPosition.y
+
+      };
+
+
       const result =
         window.RafaelaScenarios
           .evaluatePosition(
             this.currentScenario,
-            this.currentPosition
+            submittedPosition
           );
 
 
@@ -1317,8 +1356,29 @@ window.RafaelaApp = {
       }
 
 
+      /*
+        Find the strongest position according to
+        the exact same simulated evaluator that
+        graded the submitted answer.
+      */
+
+      this.currentRecommendedAnswer =
+        this.findRecommendedAnswer(
+          this.currentScenario,
+          submittedPosition,
+          result
+        );
+
+
       this.renderFeedback(
         result
+      );
+
+
+      this.revealRecommendedAnswer(
+        submittedPosition,
+        result,
+        this.currentRecommendedAnswer
       );
 
 
@@ -1360,9 +1420,1764 @@ window.RafaelaApp = {
 
 
   /*
-    -----------------------------
-    FEEDBACK UI
-    -----------------------------
+    ==================================================
+    RECOMMENDED ANSWER ENGINE
+    ==================================================
+
+    We deliberately do NOT hard-code one coordinate.
+
+    Instead:
+
+    1. Scan the simulated battlefield.
+    2. Score each candidate using evaluatePosition().
+    3. Locate the strongest-scoring area.
+    4. Refine around the strongest candidate.
+    5. Build a recommended zone around nearby
+       high-quality positions.
+
+    Therefore the revealed answer uses the same
+    logic as the grading system.
+    ==================================================
+  */
+
+
+  findRecommendedAnswer:
+    function(
+      scenario,
+      submittedPosition,
+      submittedResult
+    ) {
+
+      let candidates =
+        [];
+
+
+      /*
+        Broad scan.
+
+        Coordinates are internal training-space
+        percentages, not MLBB game-unit distances.
+      */
+
+      for (
+        let x = 5;
+        x <= 95;
+        x += 5
+      ) {
+
+        for (
+          let y = 5;
+          y <= 95;
+          y += 5
+        ) {
+
+          const candidate =
+            this.scoreCandidatePosition(
+              scenario,
+              x,
+              y
+            );
+
+
+          if (
+            candidate
+          ) {
+
+            candidates.push(
+              candidate
+            );
+
+          }
+
+        }
+
+      }
+
+
+      if (
+        candidates.length ===
+        0
+      ) {
+
+        return null;
+
+      }
+
+
+      candidates.sort(
+        function(a, b) {
+
+          return (
+            b.score
+            -
+            a.score
+          );
+
+        }
+      );
+
+
+      const broadBest =
+        candidates[
+          0
+        ];
+
+
+      /*
+        Refine close to the strongest broad result.
+      */
+
+      const refined =
+        [];
+
+
+      const startX =
+        Math.max(
+          3,
+          broadBest.x - 6
+        );
+
+
+      const endX =
+        Math.min(
+          97,
+          broadBest.x + 6
+        );
+
+
+      const startY =
+        Math.max(
+          3,
+          broadBest.y - 6
+        );
+
+
+      const endY =
+        Math.min(
+          97,
+          broadBest.y + 6
+        );
+
+
+      for (
+        let x = startX;
+        x <= endX;
+        x += 1
+      ) {
+
+        for (
+          let y = startY;
+          y <= endY;
+          y += 1
+        ) {
+
+          const candidate =
+            this.scoreCandidatePosition(
+              scenario,
+              x,
+              y
+            );
+
+
+          if (
+            candidate
+          ) {
+
+            refined.push(
+              candidate
+            );
+
+          }
+
+        }
+
+      }
+
+
+      const allCandidates =
+        candidates.concat(
+          refined
+        );
+
+
+      allCandidates.sort(
+        function(a, b) {
+
+          return (
+            b.score
+            -
+            a.score
+          );
+
+        }
+      );
+
+
+      const best =
+        allCandidates[
+          0
+        ];
+
+
+      /*
+        A strong zone is more useful than pretending
+        one pixel is the only correct answer.
+
+        We keep candidates that:
+        - score very close to the best
+        - remain geographically close to the best
+
+        This prevents disconnected good areas from
+        becoming one misleading giant zone.
+      */
+
+      const nearBest =
+        allCandidates
+          .filter(
+            (candidate) => {
+
+              const scoreClose =
+                candidate.score >=
+                best.score - 4;
+
+
+              const distance =
+                this.positionDistance(
+                  candidate,
+                  best
+                );
+
+
+              const geographicallyClose =
+                distance <=
+                14;
+
+
+              return (
+                scoreClose
+                &&
+                geographicallyClose
+              );
+
+            }
+          );
+
+
+      const zone =
+        this.buildRecommendedZone(
+          nearBest,
+          best
+        );
+
+
+      const direction =
+        this.describeMovement(
+          submittedPosition,
+          best
+        );
+
+
+      const improvements =
+        this.compareDimensions(
+          submittedResult,
+          best.result
+        );
+
+
+      return {
+
+        x:
+          best.x,
+
+        y:
+          best.y,
+
+        score:
+          best.score,
+
+        result:
+          best.result,
+
+        zone:
+          zone,
+
+        direction:
+          direction,
+
+        improvements:
+          improvements
+
+      };
+
+    },
+
+
+  scoreCandidatePosition:
+    function(
+      scenario,
+      x,
+      y
+    ) {
+
+      try {
+
+        const result =
+          window.RafaelaScenarios
+            .evaluatePosition(
+              scenario,
+              {
+                x: x,
+                y: y
+              }
+            );
+
+
+        if (
+          !result
+          ||
+          typeof result.overall !==
+            "number"
+        ) {
+
+          return null;
+
+        }
+
+
+        return {
+
+          x:
+            x,
+
+          y:
+            y,
+
+          score:
+            result.overall,
+
+          result:
+            result
+
+        };
+
+      }
+
+      catch(error) {
+
+        console.warn(
+          "Candidate position could not be evaluated:",
+          x,
+          y,
+          error
+        );
+
+
+        return null;
+
+      }
+
+    },
+
+
+  positionDistance:
+    function(
+      a,
+      b
+    ) {
+
+      const dx =
+        a.x
+        -
+        b.x;
+
+
+      const dy =
+        a.y
+        -
+        b.y;
+
+
+      return Math.sqrt(
+        dx * dx
+        +
+        dy * dy
+      );
+
+    },
+
+
+  buildRecommendedZone:
+    function(
+      candidates,
+      best
+    ) {
+
+      if (
+        !candidates
+        ||
+        candidates.length ===
+          0
+      ) {
+
+        return {
+
+          cx:
+            best.x,
+
+          cy:
+            best.y,
+
+          rx:
+            7,
+
+          ry:
+            7
+
+        };
+
+      }
+
+
+      const xs =
+        candidates.map(
+          function(candidate) {
+
+            return candidate.x;
+
+          }
+        );
+
+
+      const ys =
+        candidates.map(
+          function(candidate) {
+
+            return candidate.y;
+
+          }
+        );
+
+
+      const minX =
+        Math.min(
+          ...xs
+        );
+
+
+      const maxX =
+        Math.max(
+          ...xs
+        );
+
+
+      const minY =
+        Math.min(
+          ...ys
+        );
+
+
+      const maxY =
+        Math.max(
+          ...ys
+        );
+
+
+      const cx =
+        (
+          minX
+          +
+          maxX
+        )
+        /
+        2;
+
+
+      const cy =
+        (
+          minY
+          +
+          maxY
+        )
+        /
+        2;
+
+
+      const rx =
+        Math.max(
+          6,
+          (
+            maxX
+            -
+            minX
+          )
+          /
+          2
+          +
+          2
+        );
+
+
+      const ry =
+        Math.max(
+          6,
+          (
+            maxY
+            -
+            minY
+          )
+          /
+          2
+          +
+          2
+        );
+
+
+      return {
+
+        cx:
+          cx,
+
+        cy:
+          cy,
+
+        rx:
+          Math.min(
+            rx,
+            18
+          ),
+
+        ry:
+          Math.min(
+            ry,
+            18
+          )
+
+      };
+
+    },
+
+
+  /*
+    ==================================================
+    MOVEMENT DESCRIPTION
+    ==================================================
+  */
+
+
+  describeMovement:
+    function(
+      from,
+      to
+    ) {
+
+      const dx =
+        to.x
+        -
+        from.x;
+
+
+      const dy =
+        to.y
+        -
+        from.y;
+
+
+      const distance =
+        Math.sqrt(
+          dx * dx
+          +
+          dy * dy
+        );
+
+
+      if (
+        distance < 4
+      ) {
+
+        return (
+          "Stay around this area. "
+          +
+          "Your submitted position is already close "
+          +
+          "to the strongest zone found by the simulator."
+        );
+
+      }
+
+
+      let horizontal =
+        "";
+
+
+      let vertical =
+        "";
+
+
+      if (
+        dx > 3
+      ) {
+
+        horizontal =
+          "right";
+
+      }
+
+      else if (
+        dx < -3
+      ) {
+
+        horizontal =
+          "left";
+
+      }
+
+
+      if (
+        dy > 3
+      ) {
+
+        vertical =
+          "down";
+
+      }
+
+      else if (
+        dy < -3
+      ) {
+
+        vertical =
+          "up";
+
+      }
+
+
+      let direction =
+        "";
+
+
+      if (
+        vertical
+        &&
+        horizontal
+      ) {
+
+        direction =
+          vertical
+          +
+          "-"
+          +
+          horizontal;
+
+      }
+
+      else {
+
+        direction =
+          vertical
+          ||
+          horizontal;
+
+      }
+
+
+      if (
+        !direction
+      ) {
+
+        direction =
+          "slightly toward the highlighted zone";
+
+      }
+
+
+      const qualifier =
+        distance < 13
+        ?
+        "slightly "
+        :
+        "";
+
+
+      return (
+        "Move "
+        +
+        qualifier
+        +
+        direction
+        +
+        " toward the highlighted recommended zone."
+      );
+
+    },
+
+
+  /*
+    ==================================================
+    DIMENSION COMPARISON
+    ==================================================
+  */
+
+
+  compareDimensions:
+    function(
+      submittedResult,
+      targetResult
+    ) {
+
+      if (
+        !submittedResult
+        ||
+        !targetResult
+        ||
+        !submittedResult.dimensions
+        ||
+        !targetResult.dimensions
+      ) {
+
+        return [];
+
+      }
+
+
+      const dimensions = [
+
+        {
+          key:
+            "participation",
+
+          label:
+            "participation"
+        },
+
+        {
+          key:
+            "allyAccess",
+
+          label:
+            "ally access"
+        },
+
+        {
+          key:
+            "threatSafety",
+
+          label:
+            "threat safety"
+        },
+
+        {
+          key:
+            "objectiveAccess",
+
+          label:
+            "objective access"
+        },
+
+        {
+          key:
+            "escapeSpace",
+
+          label:
+            "escape space"
+        },
+
+        {
+          key:
+            "uncertaintySafety",
+
+          label:
+            "uncertainty safety"
+        }
+
+      ];
+
+
+      const comparison =
+        dimensions.map(
+          function(item) {
+
+            const before =
+              Number(
+                submittedResult
+                  .dimensions[
+                    item.key
+                  ]
+              )
+              ||
+              0;
+
+
+            const after =
+              Number(
+                targetResult
+                  .dimensions[
+                    item.key
+                  ]
+              )
+              ||
+              0;
+
+
+            return {
+
+              key:
+                item.key,
+
+              label:
+                item.label,
+
+              before:
+                before,
+
+              after:
+                after,
+
+              improvement:
+                after
+                -
+                before
+
+            };
+
+          }
+        );
+
+
+      comparison.sort(
+        function(a, b) {
+
+          return (
+            b.improvement
+            -
+            a.improvement
+          );
+
+        }
+      );
+
+
+      return comparison;
+
+    },
+
+
+  /*
+    ==================================================
+    ANSWER REVEAL
+    ==================================================
+  */
+
+
+  revealRecommendedAnswer:
+    function(
+      submittedPosition,
+      submittedResult,
+      answer
+    ) {
+
+      if (
+        !answer
+      ) {
+
+        return;
+
+      }
+
+
+      this.drawRecommendedAnswer(
+        submittedPosition,
+        answer
+      );
+
+
+      this.renderAnswerExplanation(
+        submittedResult,
+        answer
+      );
+
+    },
+
+
+  drawRecommendedAnswer:
+    function(
+      submittedPosition,
+      answer
+    ) {
+
+      const board =
+        this.byId(
+          "battlefield"
+        );
+
+
+      if (
+        !board
+      ) {
+
+        return;
+
+      }
+
+
+      /*
+        Remove any old reveal first.
+      */
+
+      const oldLayer =
+        this.byId(
+          "recommendedAnswerLayer"
+        );
+
+
+      if (
+        oldLayer
+      ) {
+
+        oldLayer.remove();
+
+      }
+
+
+      const oldTarget =
+        this.byId(
+          "recommendedTarget"
+        );
+
+
+      if (
+        oldTarget
+      ) {
+
+        oldTarget.remove();
+
+      }
+
+
+      /*
+        SVG layer:
+        - recommended zone
+        - movement arrow
+      */
+
+      const svgNS =
+        "http://www.w3.org/2000/svg";
+
+
+      const svg =
+        document.createElementNS(
+          svgNS,
+          "svg"
+        );
+
+
+      svg.id =
+        "recommendedAnswerLayer";
+
+
+      svg.setAttribute(
+        "viewBox",
+        "0 0 100 100"
+      );
+
+
+      svg.setAttribute(
+        "preserveAspectRatio",
+        "none"
+      );
+
+
+      Object.assign(
+        svg.style,
+        {
+          position:
+            "absolute",
+
+          inset:
+            "0",
+
+          width:
+            "100%",
+
+          height:
+            "100%",
+
+          pointerEvents:
+            "none",
+
+          zIndex:
+            "6"
+        }
+      );
+
+
+      const defs =
+        document.createElementNS(
+          svgNS,
+          "defs"
+        );
+
+
+      const marker =
+        document.createElementNS(
+          svgNS,
+          "marker"
+        );
+
+
+      marker.setAttribute(
+        "id",
+        "rafaelaAnswerArrow"
+      );
+
+
+      marker.setAttribute(
+        "markerWidth",
+        "8"
+      );
+
+
+      marker.setAttribute(
+        "markerHeight",
+        "8"
+      );
+
+
+      marker.setAttribute(
+        "refX",
+        "6"
+      );
+
+
+      marker.setAttribute(
+        "refY",
+        "3"
+      );
+
+
+      marker.setAttribute(
+        "orient",
+        "auto"
+      );
+
+
+      marker.setAttribute(
+        "markerUnits",
+        "strokeWidth"
+      );
+
+
+      const arrowHead =
+        document.createElementNS(
+          svgNS,
+          "path"
+        );
+
+
+      arrowHead.setAttribute(
+        "d",
+        "M0,0 L0,6 L7,3 z"
+      );
+
+
+      arrowHead.setAttribute(
+        "fill",
+        "#83e5a8"
+      );
+
+
+      marker.appendChild(
+        arrowHead
+      );
+
+
+      defs.appendChild(
+        marker
+      );
+
+
+      svg.appendChild(
+        defs
+      );
+
+
+      /*
+        Recommended zone.
+      */
+
+      const zone =
+        document.createElementNS(
+          svgNS,
+          "ellipse"
+        );
+
+
+      zone.setAttribute(
+        "cx",
+        answer.zone.cx
+      );
+
+
+      zone.setAttribute(
+        "cy",
+        answer.zone.cy
+      );
+
+
+      zone.setAttribute(
+        "rx",
+        answer.zone.rx
+      );
+
+
+      zone.setAttribute(
+        "ry",
+        answer.zone.ry
+      );
+
+
+      zone.setAttribute(
+        "fill",
+        "rgba(88, 197, 138, 0.16)"
+      );
+
+
+      zone.setAttribute(
+        "stroke",
+        "#65d995"
+      );
+
+
+      zone.setAttribute(
+        "stroke-width",
+        "0.8"
+      );
+
+
+      zone.setAttribute(
+        "stroke-dasharray",
+        "2.2 1.8"
+      );
+
+
+      svg.appendChild(
+        zone
+      );
+
+
+      /*
+        Arrow from submitted position
+        to recommended target.
+      */
+
+      const line =
+        document.createElementNS(
+          svgNS,
+          "line"
+        );
+
+
+      line.setAttribute(
+        "x1",
+        submittedPosition.x
+      );
+
+
+      line.setAttribute(
+        "y1",
+        submittedPosition.y
+      );
+
+
+      line.setAttribute(
+        "x2",
+        answer.x
+      );
+
+
+      line.setAttribute(
+        "y2",
+        answer.y
+      );
+
+
+      line.setAttribute(
+        "stroke",
+        "#83e5a8"
+      );
+
+
+      line.setAttribute(
+        "stroke-width",
+        "0.9"
+      );
+
+
+      line.setAttribute(
+        "stroke-dasharray",
+        "2.5 1.7"
+      );
+
+
+      line.setAttribute(
+        "marker-end",
+        "url(#rafaelaAnswerArrow)"
+      );
+
+
+      line.setAttribute(
+        "opacity",
+        "0.9"
+      );
+
+
+      svg.appendChild(
+        line
+      );
+
+
+      board.appendChild(
+        svg
+      );
+
+
+      /*
+        Target marker.
+      */
+
+      const target =
+        document.createElement(
+          "div"
+        );
+
+
+      target.id =
+        "recommendedTarget";
+
+
+      target.textContent =
+        "TARGET";
+
+
+      target.style.left =
+        answer.x
+        +
+        "%";
+
+
+      target.style.top =
+        answer.y
+        +
+        "%";
+
+
+      Object.assign(
+        target.style,
+        {
+          position:
+            "absolute",
+
+          transform:
+            "translate(-50%, -50%)",
+
+          minWidth:
+            "58px",
+
+          height:
+            "34px",
+
+          padding:
+            "0 8px",
+
+          display:
+            "grid",
+
+          placeItems:
+            "center",
+
+          border:
+            "2px solid #d9ffe7",
+
+          borderRadius:
+            "999px",
+
+          background:
+            "#58c58a",
+
+          color:
+            "#072615",
+
+          fontSize:
+            "9px",
+
+          fontWeight:
+            "900",
+
+          letterSpacing:
+            "0.05em",
+
+          boxShadow:
+            "0 0 0 7px rgba(88,197,138,0.13), 0 8px 20px rgba(0,0,0,0.32)",
+
+          zIndex:
+            "9",
+
+          pointerEvents:
+            "none"
+        }
+      );
+
+
+      board.appendChild(
+        target
+      );
+
+
+      /*
+        Give submitted R a visible
+        "YOUR ANSWER" label.
+      */
+
+      const rafaela =
+        this.byId(
+          "rafaelaMarker"
+        );
+
+
+      if (
+        rafaela
+      ) {
+
+        rafaela.title =
+          "Your submitted position";
+
+
+        rafaela.style.boxShadow =
+          "0 0 0 7px rgba(181,160,255,0.16), 0 9px 22px rgba(0,0,0,0.32)";
+
+      }
+
+    },
+
+
+  /*
+    ==================================================
+    ANSWER EXPLANATION PANEL
+    ==================================================
+  */
+
+
+  renderAnswerExplanation:
+    function(
+      submittedResult,
+      answer
+    ) {
+
+      const feedback =
+        this.byId(
+          "feedbackPanel"
+        );
+
+
+      if (
+        !feedback
+      ) {
+
+        return;
+
+      }
+
+
+      this.removeAnswerExplanation();
+
+
+      const panel =
+        document.createElement(
+          "section"
+        );
+
+
+      panel.id =
+        "recommendedAnswerExplanation";
+
+
+      Object.assign(
+        panel.style,
+        {
+          marginTop:
+            "16px",
+
+          padding:
+            "17px",
+
+          border:
+            "1px solid rgba(88,197,138,0.28)",
+
+          borderRadius:
+            "17px",
+
+          background:
+            "rgba(88,197,138,0.07)"
+        }
+      );
+
+
+      const heading =
+        document.createElement(
+          "div"
+        );
+
+
+      heading.textContent =
+        "BEST-SUPPORTED ANSWER";
+
+
+      Object.assign(
+        heading.style,
+        {
+          marginBottom:
+            "6px",
+
+          color:
+            "#7fe0a3",
+
+          fontSize:
+            "10px",
+
+          fontWeight:
+            "900",
+
+          letterSpacing:
+            "0.1em"
+        }
+      );
+
+
+      panel.appendChild(
+        heading
+      );
+
+
+      const title =
+        document.createElement(
+          "h3"
+        );
+
+
+      title.textContent =
+        answer.direction;
+
+
+      Object.assign(
+        title.style,
+        {
+          margin:
+            "0 0 10px",
+
+          fontSize:
+            "16px",
+
+          lineHeight:
+            "1.4"
+        }
+      );
+
+
+      panel.appendChild(
+        title
+      );
+
+
+      const score =
+        document.createElement(
+          "p"
+        );
+
+
+      score.textContent =
+        (
+          "Your simulated score: "
+          +
+          submittedResult.overall
+          +
+          "/100. "
+          +
+          "Recommended target score under this scenario evaluator: "
+          +
+          answer.score
+          +
+          "/100."
+        );
+
+
+      Object.assign(
+        score.style,
+        {
+          margin:
+            "0 0 12px",
+
+          color:
+            "#bcc6e8",
+
+          fontSize:
+            "12px",
+
+          lineHeight:
+            "1.5"
+        }
+      );
+
+
+      panel.appendChild(
+        score
+      );
+
+
+      const usefulImprovements =
+        (
+          answer.improvements
+          ||
+          []
+        )
+          .filter(
+            function(item) {
+
+              return (
+                item.improvement >
+                1
+              );
+
+            }
+          )
+          .slice(
+            0,
+            3
+          );
+
+
+      if (
+        usefulImprovements.length >
+        0
+      ) {
+
+        const whyTitle =
+          document.createElement(
+            "strong"
+          );
+
+
+        whyTitle.textContent =
+          "What improves";
+
+
+        Object.assign(
+          whyTitle.style,
+          {
+            display:
+              "block",
+
+            marginBottom:
+              "7px",
+
+            color:
+              "#d8ffe5",
+
+            fontSize:
+              "11px",
+
+            textTransform:
+              "uppercase",
+
+            letterSpacing:
+              "0.06em"
+          }
+        );
+
+
+        panel.appendChild(
+          whyTitle
+        );
+
+
+        const list =
+          document.createElement(
+            "ul"
+          );
+
+
+        Object.assign(
+          list.style,
+          {
+            margin:
+              "0 0 12px",
+
+            paddingLeft:
+              "18px",
+
+            color:
+              "#bcc6e8",
+
+            fontSize:
+              "12px",
+
+            lineHeight:
+              "1.55"
+          }
+        );
+
+
+        usefulImprovements.forEach(
+          function(item) {
+
+            const li =
+              document.createElement(
+                "li"
+              );
+
+
+            li.textContent =
+              (
+                item.label
+                +
+                ": "
+                +
+                item.before
+                +
+                " → "
+                +
+                item.after
+              );
+
+
+            list.appendChild(
+              li
+            );
+
+          }
+        );
+
+
+        panel.appendChild(
+          list
+        );
+
+      }
+
+
+      const doctrine =
+        document.createElement(
+          "p"
+        );
+
+
+      doctrine.textContent =
+        (
+          "Read the green area as a recommended zone, "
+          +
+          "not one magical pixel. It represents nearby "
+          +
+          "positions that score close to the strongest "
+          +
+          "answer under the current simulated facts."
+        );
+
+
+      Object.assign(
+        doctrine.style,
+        {
+          margin:
+            "0 0 10px",
+
+          color:
+            "#c8d2ef",
+
+          fontSize:
+            "12px",
+
+          lineHeight:
+            "1.55"
+        }
+      );
+
+
+      panel.appendChild(
+        doctrine
+      );
+
+
+      const caution =
+        document.createElement(
+          "p"
+        );
+
+
+      caution.textContent =
+        (
+          "If ally locations, threats, objective state, "
+          +
+          "resources, terrain, or unknown information change, "
+          +
+          "the recommended position may also change. "
+          +
+          "This is decision practice, not proof of mechanical "
+          +
+          "execution in a real MLBB match."
+        );
+
+
+      Object.assign(
+        caution.style,
+        {
+          margin:
+            "0",
+
+          color:
+            "#8490b8",
+
+          fontSize:
+            "10px",
+
+          lineHeight:
+            "1.5"
+        }
+      );
+
+
+      panel.appendChild(
+        caution
+      );
+
+
+      feedback.appendChild(
+        panel
+      );
+
+    },
+
+
+  removeAnswerExplanation:
+    function() {
+
+      const panel =
+        this.byId(
+          "recommendedAnswerExplanation"
+        );
+
+
+      if (
+        panel
+      ) {
+
+        panel.remove();
+
+      }
+
+    },
+
+
+  /*
+    ==================================================
+    STANDARD FEEDBACK UI
+    ==================================================
   */
 
 
@@ -1507,9 +3322,9 @@ window.RafaelaApp = {
 
 
   /*
-    -----------------------------
+    ==================================================
     WORKOUT COMPLETION
-    -----------------------------
+    ==================================================
   */
 
 
@@ -1557,13 +3372,17 @@ window.RafaelaApp = {
 
 
       if (
-        results.length > 0
+        results.length >
+        0
       ) {
 
         average =
           Math.round(
             results.reduce(
-              function(total, result) {
+              function(
+                total,
+                result
+              ) {
 
                 return (
                   total
@@ -1636,7 +3455,8 @@ window.RafaelaApp = {
     function() {
 
       if (
-        this.sessionResults.length === 0
+        this.sessionResults.length ===
+        0
       ) {
 
         return null;
@@ -1645,6 +3465,7 @@ window.RafaelaApp = {
 
 
       const keys = [
+
         {
           key:
             "participation",
@@ -1692,6 +3513,7 @@ window.RafaelaApp = {
           label:
             "Uncertainty Safety"
         }
+
       ];
 
 
@@ -1760,9 +3582,9 @@ window.RafaelaApp = {
 
 
   /*
-    -----------------------------
+    ==================================================
     PROGRESS SCREEN
-    -----------------------------
+    ==================================================
   */
 
 
@@ -1912,9 +3734,9 @@ window.RafaelaApp = {
 
 
   /*
-    -----------------------------
+    ==================================================
     DOCTRINE SCREEN
-    -----------------------------
+    ==================================================
   */
 
 
@@ -1996,9 +3818,9 @@ window.RafaelaApp = {
 
 
   /*
-    -----------------------------
+    ==================================================
     ERROR UI
-    -----------------------------
+    ==================================================
   */
 
 
@@ -2021,7 +3843,7 @@ window.RafaelaApp = {
 
 
 /*
-  Start after the HTML is ready.
+  Start after HTML is ready.
 */
 
 document.addEventListener(
