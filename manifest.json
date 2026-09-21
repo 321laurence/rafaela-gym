@@ -1,11 +1,25 @@
 {
   "name": "Rafaela Gym",
-  "short_name": "Rafaela Gym",
-  "description": "A practical Rafaela training gym based on the Universal Support Doctrine.",
+  "short_name": "RafaGym",
+  "description": "Train Rafaela decisions through repeated execution using the Universal Support Doctrine.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
   "background_color": "#0d1020",
   "theme_color": "#13162a",
-  "orientation": "portrait-primary"
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "./icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "./icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
 }
