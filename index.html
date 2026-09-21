@@ -2,12 +2,27 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+
   <meta
     name="viewport"
     content="width=device-width, initial-scale=1.0, viewport-fit=cover"
   />
 
   <title>Rafaela Gym</title>
+
+  <link rel="manifest" href="./manifest.json" />
+
+  <meta name="theme-color" content="#13162a" />
+
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta
+    name="apple-mobile-web-app-status-bar-style"
+    content="black-translucent"
+  />
+  <meta
+    name="apple-mobile-web-app-title"
+    content="Rafaela Gym"
+  />
 
   <style>
     * {
@@ -16,11 +31,14 @@
 
     body {
       margin: 0;
-      font-family: Arial, Helvetica, sans-serif;
-      background:
-        linear-gradient(180deg, #13162a 0%, #0d1020 100%);
-      color: #ffffff;
       min-height: 100vh;
+      font-family: Arial, Helvetica, sans-serif;
+      background: linear-gradient(
+        180deg,
+        #13162a 0%,
+        #0d1020 100%
+      );
+      color: #ffffff;
     }
 
     .app {
@@ -36,7 +54,7 @@
     .eyebrow {
       color: #b9a9ff;
       font-size: 13px;
-      font-weight: bold;
+      font-weight: 700;
       letter-spacing: 1px;
       text-transform: uppercase;
     }
@@ -47,17 +65,17 @@
     }
 
     .subtitle {
+      margin: 0;
       color: #b9bdd1;
       line-height: 1.5;
-      margin: 0;
     }
 
     .card {
-      background: #181c33;
+      margin-bottom: 15px;
+      padding: 16px;
       border: 1px solid #303652;
       border-radius: 18px;
-      padding: 16px;
-      margin-bottom: 15px;
+      background: #181c33;
     }
 
     .top-row {
@@ -75,36 +93,52 @@
     .focus {
       margin-top: 6px;
       font-size: 18px;
-      font-weight: bold;
+      font-weight: 700;
       line-height: 1.4;
     }
 
     .score-box {
       min-width: 86px;
-      text-align: center;
       padding: 10px;
+      text-align: center;
+      border: 1px solid #303652;
       border-radius: 14px;
       background: #101426;
-      border: 1px solid #303652;
     }
 
     .score-number {
       font-size: 25px;
-      font-weight: bold;
+      font-weight: 700;
     }
 
     .score-label {
+      margin-top: 2px;
       color: #9ea5c3;
       font-size: 11px;
-      margin-top: 2px;
+    }
+
+    .progress {
+      height: 7px;
+      margin-top: 12px;
+      overflow: hidden;
+      border-radius: 10px;
+      background: #101426;
+    }
+
+    .progress-fill {
+      width: 20%;
+      height: 100%;
+      background: #bda7ff;
+      transition: width 0.3s ease;
     }
 
     .battlefield {
       position: relative;
       height: 430px;
       overflow: hidden;
-      border-radius: 18px;
       border: 1px solid #3a4060;
+      border-radius: 18px;
+
       background:
         radial-gradient(
           circle at center,
@@ -153,14 +187,15 @@
       width: 48px;
       height: 48px;
       transform: translate(-50%, -50%);
+      border: 2px solid rgba(255, 255, 255, 0.4);
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
       font-size: 11px;
-      font-weight: bold;
-      border: 2px solid rgba(255, 255, 255, 0.4);
+      font-weight: 700;
       z-index: 5;
+
       transition:
         left 0.18s ease,
         top 0.18s ease;
@@ -171,9 +206,9 @@
       height: 52px;
       background: #c9b5ff;
       color: #21163f;
-      border: 3px solid white;
-      z-index: 10;
+      border: 3px solid #ffffff;
       box-shadow: 0 0 0 6px rgba(201, 181, 255, 0.12);
+      z-index: 10;
     }
 
     #ally {
@@ -201,11 +236,11 @@
     }
 
     .legend-item {
-      font-size: 12px;
-      color: #c4c8db;
-      background: #101426;
-      border-radius: 999px;
       padding: 7px 10px;
+      border-radius: 999px;
+      background: #101426;
+      color: #c4c8db;
+      font-size: 12px;
     }
 
     .buttons {
@@ -220,7 +255,7 @@
       border: none;
       border-radius: 14px;
       font-size: 15px;
-      font-weight: bold;
+      font-weight: 700;
       cursor: pointer;
     }
 
@@ -231,7 +266,7 @@
 
     .secondary {
       background: #272d48;
-      color: white;
+      color: #ffffff;
       border: 1px solid #3b4262;
     }
 
@@ -249,9 +284,9 @@
     }
 
     .result-title {
-      font-size: 20px;
-      font-weight: bold;
       margin-bottom: 14px;
+      font-size: 20px;
+      font-weight: 700;
     }
 
     .feedback-grid {
@@ -262,18 +297,18 @@
 
     .feedback-section strong {
       display: block;
-      font-size: 12px;
-      color: #b8a9ff;
-      text-transform: uppercase;
-      letter-spacing: 0.7px;
       margin-bottom: 5px;
+      color: #b8a9ff;
+      font-size: 12px;
+      letter-spacing: 0.7px;
+      text-transform: uppercase;
     }
 
     .feedback-section p {
       margin: 0;
       color: #d2d5e2;
-      line-height: 1.5;
       font-size: 14px;
+      line-height: 1.5;
     }
 
     .doctrine {
@@ -284,22 +319,7 @@
     }
 
     .doctrine strong {
-      color: white;
-    }
-
-    .progress {
-      margin-top: 12px;
-      height: 7px;
-      background: #101426;
-      border-radius: 10px;
-      overflow: hidden;
-    }
-
-    .progress-fill {
-      height: 100%;
-      width: 20%;
-      background: #bda7ff;
-      transition: width 0.3s ease;
+      color: #ffffff;
     }
 
     @media (max-width: 560px) {
@@ -327,10 +347,14 @@
 </head>
 
 <body>
+
   <main class="app">
 
     <header class="header">
-      <div class="eyebrow">Universal Support Doctrine</div>
+      <div class="eyebrow">
+        Universal Support Doctrine
+      </div>
+
       <h1>Rafaela Gym</h1>
 
       <p class="subtitle">
@@ -347,16 +371,26 @@
         <div>
           <div class="small-label">
             Positioning Gym · Rep
-            <span id="rep">1</span> / 5
+            <span id="rep">1</span>
+            / 5
           </div>
 
-          <div class="focus" id="focus">
+          <div
+            class="focus"
+            id="focus"
+          >
             Support the objective without becoming the easiest target.
           </div>
         </div>
 
         <div class="score-box">
-          <div class="score-number" id="score">—</div>
+          <div
+            class="score-number"
+            id="score"
+          >
+            —
+          </div>
+
           <div class="score-label">
             position
           </div>
@@ -365,7 +399,10 @@
       </div>
 
       <div class="progress">
-        <div class="progress-fill" id="progressFill"></div>
+        <div
+          class="progress-fill"
+          id="progressFill"
+        ></div>
       </div>
 
     </section>
@@ -373,32 +410,54 @@
 
     <section class="card">
 
-      <div class="small-label" style="margin-bottom:10px;">
+      <div
+        class="small-label"
+        style="margin-bottom: 10px;"
+      >
         Tap anywhere on the battlefield to move Rafaela.
       </div>
 
-      <div class="battlefield" id="battlefield">
+      <div
+        class="battlefield"
+        id="battlefield"
+      >
 
         <div class="river"></div>
+
         <div class="objective-zone"></div>
 
-        <div class="unit" id="objective">
+        <div
+          class="unit"
+          id="objective"
+        >
           OBJ
         </div>
 
-        <div class="unit" id="ally">
+        <div
+          class="unit"
+          id="ally"
+        >
           ALLY
         </div>
 
-        <div class="unit" id="frontliner">
+        <div
+          class="unit"
+          id="frontliner"
+        >
           FRONT
         </div>
 
-        <div class="unit" id="threat">
+        <div
+          class="unit"
+          id="threat"
+        >
           THREAT
         </div>
 
-        <div class="unit" id="rafaela">
+        <div
+          class="unit"
+          id="rafaela"
+        >
           R
         </div>
 
@@ -406,11 +465,27 @@
 
 
       <div class="legend">
-        <div class="legend-item">R = Rafaela</div>
-        <div class="legend-item">ALLY = priority ally</div>
-        <div class="legend-item">FRONT = frontline</div>
-        <div class="legend-item">THREAT = enemy threat</div>
-        <div class="legend-item">OBJ = objective</div>
+
+        <div class="legend-item">
+          R = Rafaela
+        </div>
+
+        <div class="legend-item">
+          ALLY = priority ally
+        </div>
+
+        <div class="legend-item">
+          FRONT = frontline
+        </div>
+
+        <div class="legend-item">
+          THREAT = enemy threat
+        </div>
+
+        <div class="legend-item">
+          OBJ = objective
+        </div>
+
       </div>
 
 
@@ -444,8 +519,7 @@
       <div
         class="result-title"
         id="resultTitle"
-      >
-      </div>
+      ></div>
 
       <div class="feedback-grid">
 
@@ -476,9 +550,11 @@
 
     <section class="card doctrine">
 
-      <strong>Decision Loop</strong>
+      <strong>
+        Decision Loop
+      </strong>
 
-      <br>
+      <br />
 
       Observe →
       Assess →
@@ -494,9 +570,7 @@
 
 
   <script>
-
     const reps = [
-
       {
         focus:
           "Support the objective without becoming the easiest target.",
@@ -551,7 +625,6 @@
         threat: [31, 49],
         objective: [51, 28]
       }
-
     ];
 
 
@@ -582,7 +655,6 @@
     const objective =
       document.getElementById("objective");
 
-
     const repText =
       document.getElementById("rep");
 
@@ -605,41 +677,46 @@
       document.getElementById("progressFill");
 
 
-    function placeUnit(element, position) {
-
+    function placeUnit(
+      element,
+      position
+    ) {
       element.style.left =
         position[0] + "%";
 
       element.style.top =
         position[1] + "%";
-
     }
 
 
-    function distance(a, b) {
+    function distance(
+      a,
+      b
+    ) {
+      const dx =
+        a[0] - b[0];
 
-      const dx = a[0] - b[0];
-      const dy = a[1] - b[1];
+      const dy =
+        a[1] - b[1];
 
       return Math.sqrt(
-        dx * dx + dy * dy
+        dx * dx +
+        dy * dy
       );
-
     }
 
 
     function loadRep() {
-
       const rep =
         reps[currentRep];
 
-      evaluated = false;
+      evaluated =
+        false;
 
       rafaelaPosition = [
         rep.rafaela[0],
         rep.rafaela[1]
       ];
-
 
       placeUnit(
         rafaela,
@@ -666,7 +743,6 @@
         rep.objective
       );
 
-
       repText.textContent =
         currentRep + 1;
 
@@ -686,11 +762,15 @@
       evaluateButton.disabled =
         false;
 
-
       progressFill.style.width =
-        ((currentRep + 1) / reps.length * 100)
+        (
+          (currentRep + 1)
+          /
+          reps.length
+          *
+          100
+        )
         + "%";
-
     }
 
 
@@ -705,46 +785,49 @@
         const rectangle =
           battlefield.getBoundingClientRect();
 
-
         let x =
           (
             (event.clientX - rectangle.left)
             /
             rectangle.width
-          ) * 100;
-
+          )
+          *
+          100;
 
         let y =
           (
             (event.clientY - rectangle.top)
             /
             rectangle.height
-          ) * 100;
-
+          )
+          *
+          100;
 
         x =
           Math.max(
             5,
-            Math.min(95, x)
+            Math.min(
+              95,
+              x
+            )
           );
-
 
         y =
           Math.max(
             5,
-            Math.min(95, y)
+            Math.min(
+              95,
+              y
+            )
           );
-
 
         rafaelaPosition =
           [x, y];
-
 
         placeUnit(
           rafaela,
           rafaelaPosition
         );
-
       }
     );
 
@@ -764,13 +847,10 @@
         if (
           currentRep >= reps.length
         ) {
-
           currentRep = 0;
-
         }
 
         loadRep();
-
       }
     );
 
@@ -800,20 +880,17 @@
           rep.ally
         );
 
-
       const threatDistance =
         distance(
           rafaelaPosition,
           rep.threat
         );
 
-
       const objectiveDistance =
         distance(
           rafaelaPosition,
           rep.objective
         );
-
 
       const frontDistance =
         distance(
@@ -828,57 +905,47 @@
       if (
         allyDistance > 36
       ) {
-
         score -=
           Math.min(
             35,
             (allyDistance - 36) * 1.4
           );
-
       }
 
 
       if (
         allyDistance < 9
       ) {
-
         score -= 8;
-
       }
 
 
       if (
         threatDistance < 22
       ) {
-
         score -=
           Math.min(
             40,
             (22 - threatDistance) * 2.4
           );
-
       }
 
 
       if (
         objectiveDistance > 48
       ) {
-
         score -=
           Math.min(
             25,
             objectiveDistance - 48
           );
-
       }
 
 
       if (
         frontDistance < 8
       ) {
-
         score -= 10;
-
       }
 
 
@@ -886,7 +953,10 @@
         Math.round(
           Math.max(
             0,
-            Math.min(100, score)
+            Math.min(
+              100,
+              score
+            )
           )
         );
 
@@ -916,7 +986,6 @@
 
         check =
           "If an ally, threat, objective, or escape route changes, reposition again.";
-
       }
 
       else if (
@@ -934,7 +1003,6 @@
 
         check =
           "Can the threat reach you easily? Can you move safer without disconnecting?";
-
       }
 
       else if (
@@ -952,7 +1020,6 @@
 
         check =
           "Can you realistically support the ally if the fight starts now?";
-
       }
 
       else {
@@ -968,14 +1035,13 @@
 
         check =
           "Can you help immediately while still responding safely if the situation changes?";
-
       }
 
 
       document.getElementById(
         "resultTitle"
       ).textContent =
-        title + " · " + score + "/100";
+        `${title} · ${score}/100`;
 
 
       document.getElementById(
@@ -1005,12 +1071,10 @@
       feedback.classList.add(
         "show"
       );
-
     }
 
 
     loadRep();
-
   </script>
 
 </body>
